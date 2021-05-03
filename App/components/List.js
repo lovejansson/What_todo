@@ -10,6 +10,9 @@ import {
 import { DataContext } from "../data/DataContext";
 import Icon from "react-native-vector-icons/AntDesign";
 import TaskItem from "../components/TaskItem";
+import MenuRight from "../components/MenuRight";
+import Menu from "../components/Menu";
+import { useLayoutEffect } from "react";
 
 
 
@@ -32,6 +35,15 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 18,
   },
+  menu: {
+    position: "absolute",
+    right: 16,
+    top: 0,
+    height: 100,
+    width:100,
+    backgroundColor: "blue",
+
+}
 });
 
 // swipe to delete list and task
@@ -50,6 +62,35 @@ const setTasks= useContext(DataContext).setTasks;
   const loading = useContext(DataContext).loading;
 
   const tasks = useContext(DataContext).tasks;
+
+  const deleteList = {icon: "delete", title: "Delete list", action: ()=> console.log("delete list")};
+  const editList = {icon: "edit", title: "Edit list", action: ()=> console.log("edit list")};
+  const deleteCompleted =  {icon: "delete", title: "Delete completed tasks", action: ()=> console.log("delete completed tasks")};
+
+  const menuItems = [deleteList, editList,deleteCompleted ]
+
+  const [showMenu, setShowMenu] = useState(false);
+
+  function displayMenu(){
+      console.log("display menu")
+  
+      if(showMenu){
+        console.log("setting false")
+        setShowMenu(false);
+
+      }else{
+        console.log("settingtrue")
+        setShowMenu(true);
+      }
+      console.log(showMenu);
+  }
+
+  useLayoutEffect(()=>{
+    navigation.setOptions({ title: route.params.listName,  headerRight: () => <MenuRight onPress={displayMenu}/>});
+
+  }, [])
+
+
 
   useEffect(() => {
    
@@ -136,6 +177,9 @@ const setTasks= useContext(DataContext).setTasks;
         {/* <Text style={styles.newListBtnText}>New list</Text> */}
         <Icon style={styles.icon} name="plus" size={32} color="white" />
       </TouchableOpacity>
+      {true && <View style={styles.menu}>
+          <Menu items={menuItems}/>
+          </View>}
     </View>
   );
 }

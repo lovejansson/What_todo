@@ -71,9 +71,18 @@ lägga till ny task - done
 
 markera som klar -> stryks  över bock/fyrkant att kryssa i -> done
 
-due date -> lägg till vid ny task samt visa i listan med svart/rött om det är passed time
+meny för att radera alla delete list / edit list / delete completed tasks / delete all tasks
 
-select list to put task in -> required -> gör i morgon 
+drag and drop to order items 
+
+hemsida med overview över de listor som finns + ikoner för att göra nya listor
+
+
+TESTA/styla innan resten 
+
+huvud meny med: Settings Send feedback 
+
+setting screen : theme sync data
 
 klicka på task för att ändra beskrivning/delete task/due date / list - i morgon kunna ta bort alla som är klara fort 
 

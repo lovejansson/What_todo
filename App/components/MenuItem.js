@@ -1,0 +1,43 @@
+import React from "react";
+import Icon from "react-native-vector-icons/AntDesign";
+
+import {StyleSheet, TouchableOpacity, Text} from "react-native";
+
+/*
+
+Delete list -> först popup som ska bekräfta att användaren är säker -> 
+sedan delete list + tasks och navigera tillbaka till listan av listor
+Edit list -> navigera till popup edit list 
+___________
+Delete completed tasks -> deletar nuvarande tasks listan för alla som är lediga
+
+*/ 
+
+const styles = StyleSheet.create({
+
+    container: {
+      flexDirection: "row",
+      paddingVertical: 4,
+    },
+    icon:{
+      marginEnd: 8,
+    },
+    text: {
+      color: "#fff"
+    }
+  });
+
+/**
+ * @props content :
+ * {icon: AntDesign 'name' attribute, title: description of item, action: Function to execute when selected }
+ */
+export default function MenuItem({content}){
+  console.log("CONTENT")
+  console.log(content)
+
+    return (
+        <TouchableOpacity style={styles.container} onPress={content.action}>
+          <Icon name={content.icon} size={24} style={styles.icon} />
+          <Text>{content.title}</Text>
+          </TouchableOpacity>)
+}

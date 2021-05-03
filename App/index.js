@@ -15,7 +15,7 @@ export default function App() {
    
     <DataProvider>
       <NavigationContainer>
-        <Stack.Navigator mode="modal">
+        <Stack.Navigator >
           <Stack.Screen
             name="Main"
             component={Main}

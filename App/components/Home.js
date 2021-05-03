@@ -13,6 +13,7 @@ import Icon from "react-native-vector-icons/AntDesign";
 import ListItem from "../components/ListItem";
 
 
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "red",
@@ -48,11 +49,9 @@ export default function Home({navigation}) {
   // console.log(lists);
 
   function renderItem({item}){
-
-   
-
     return (
       <ListItem item={item} onPress={() => {
+
         navigation.navigate("List", {listName: item.name, listId: item.id});
       }} />
     )
