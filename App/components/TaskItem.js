@@ -71,12 +71,13 @@ lägga till ny task - done
 
 markera som klar -> stryks  över bock/fyrkant att kryssa i -> done
 
-meny för att radera alla delete list / edit list / delete completed tasks / delete all tasks
+meny för att radera alla delete list / edit list / delete completed tasks / delete all tasks -> klar 
 
-hemsida med overview över de listor som finns + ikoner för att göra nya listor
+hemsida med overview över de listor som finns + ikoner för att göra nya listor-> done
 
-drag and drop to order items 
+bakgrundsbild -> i morgon 
 
+drag and drop to order items -> helgen
 
 TESTA/styla innan resten 
 
@@ -84,11 +85,9 @@ huvud meny med: Settings Send feedback
 
 setting screen : theme sync data
 
-klicka på task för att ändra beskrivning/delete task/due date / list - i morgon kunna ta bort alla som är klara fort 
+klicka på task för att ändra beskrivning/delete task/due date / list
 
 */
-
-
 
 export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
 

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Text,
   View,
@@ -12,38 +12,49 @@ import { DataContext } from "../data/DataContext";
 
 import Icons from "./Icons";
 import Icon from "react-native-vector-icons/AntDesign";
+import Emoji from 'react-native-emoji';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000"
   },
   inputContainer: {
-    backgroundColor: "green",
-
-    justifyContent: "center",
+    backgroundColor: "#303030",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 20,
+  },
+
+  label:{
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
 
   inputName: {
-    backgroundColor: "yellow",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    marginTop: 20,
+    backgroundColor: "#606060",
+    color: "#fff",
     fontSize: 20,
-    width: "90%",
+    width: "100%",
+    marginBottom: 16,
+    padding: 16,
+
   },
-  inputIcon: {
-    backgroundColor: "yellow",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    fontSize: 20,
-    width: "90%",
+
+  buttonIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginEnd: 16,
+    alignSelf: "flex-end"
+
   },
-  inputIconText: {
-    fontSize: 20,
+
+  emoji: {
+    fontSize: 32,
+    marginEnd: 4,
   },
+
   button: {
     alignSelf: "flex-end",
     margin: 16,
@@ -76,21 +87,48 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function NewList({ navigation }) {
+export default function NewList({ navigation, route}) {
   const db = useContext(DataContext).db;
   const setLists = useContext(DataContext).setLists;
 
    const [showIconsPopup, setShowIconsPopup] = useState(false);
-  const [chosenIcon, setChosenIcon] = useState("");
+  const [chosenIcon, setChosenIcon] = useState("memo");
   const [chosenListName, setChosenListName] = useState("");
 
-  async function saveList() {
-    let newId = await db.insertList(chosenListName, chosenIcon);
+  useEffect(()=>{
+    if(route.params){
 
-    setLists((oldLists) => [
-      ...oldLists,
-      { name: chosenListName, icon: chosenIcon, id: newId },
-    ]);
+      setChosenIcon(route.params.list.icon);
+      setChosenListName(route.params.list.name);
+    }
+
+  }, [])
+
+  async function saveList() {
+
+    if(route.params){
+
+      let updated = await db.updateList({id: route.params.list.id, name: chosenListName, icon: chosenIcon})
+
+      if(updated){
+        setLists((oldLists) => {
+          let idx = oldLists.indexOf(route.params.list);
+
+          oldLists[idx] = {id: route.params.list.id, name: chosenListName, icon: chosenIcon, count: route.params.list.count};
+
+          return oldLists;
+          
+        }
+        );
+      }
+    }else{
+      let newId = await db.insertList(chosenListName, chosenIcon);
+      setLists((oldLists) => [
+        ...oldLists,
+        { name: chosenListName, icon: chosenIcon, id: newId, count: 0 },
+      ]);
+
+    }
   }
 
   return (
@@ -102,11 +140,9 @@ export default function NewList({ navigation }) {
         onRequestClose={() => setShowIconsPopup(false)}
       >
         <Icons
-          dismiss={() => {
-            setShowIconsPopup(false);
-          }}
-          setChosenIcon={(icon) => {
+          dismiss={(icon) => {
             setChosenIcon(icon);
+            setShowIconsPopup(false);
           }}
         />
       </Modal>
@@ -122,21 +158,24 @@ export default function NewList({ navigation }) {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.inputName}
+          value = {chosenListName}
           placeholder="Name"
+          placeholderTextColor="#fff"
+        selectionColor="#fff"
           keyboardType="ascii-capable"
           onChangeText={(value) => {
             setChosenListName(value);
           }}
         />
-        <TouchableOpacity
-          style={styles.inputIcon}
-          onPress={() => {
-            console.log("show icons popup");
 
+      <TouchableOpacity
+      style={styles.buttonIcon}
+          onPress={() => {
             setShowIconsPopup(true);
           }}
         >
-          <Text style={styles.inputIconText}>{chosenIcon}</Text>
+          <Emoji name={chosenIcon} style={styles.emoji}/>
+          <Icon name="down" size={24} color="#fff"/>
         </TouchableOpacity>
       </View>
 

@@ -59,7 +59,7 @@ const setLists = useContext(DataContext).setLists;
 
 
   const deleteListItem = {icon: "delete", title: "Delete list", action: toggleShowConfirmationDialog};
-  const editListItem = {icon: "edit", title: "Edit list", action: ()=> console.log("todo edit list")};
+  const editListItem = {icon: "edit", title: "Edit list", action: openEditList};
   const deleteCompletedItem =  {icon: "closecircleo", title: "Delete completed tasks", action: deleteCompletedTasks};
 
   const menuItems = [deleteListItem, editListItem,deleteCompletedItem ]
@@ -69,6 +69,10 @@ const setLists = useContext(DataContext).setLists;
 
   function toggleShowMenu(){
       setShowMenu(!showMenu);
+  }
+
+  function openEditList(){
+    navigation.navigate("NewList", {list: route.params.list})
   }
 
   function toggleShowConfirmationDialog(){ 
@@ -97,14 +101,14 @@ const setLists = useContext(DataContext).setLists;
   }
 
   useLayoutEffect(()=>{
-    navigation.setOptions({ title: route.params.listName,  headerRight: () => <HeaderActionRight onPress={toggleShowMenu}/>});
+    navigation.setOptions({ title: route.params.list.name,  headerRight: () => <HeaderActionRight onPress={toggleShowMenu}/>});
   }, [showMenu])
 
 
 
   useEffect(() => {
    
-     setListId(route.params.listId);
+     setListId(route.params.list.id);
      return ()=>{
        setListId(null);
        setTasks([]);
@@ -135,7 +139,7 @@ const setLists = useContext(DataContext).setLists;
     let deleted;
 
     try{
-      deleted = await db.deleteList(route.params.listId);
+      deleted = await db.deleteList(route.params.list.id);
     }catch(error){
       console.error(error);
     }
@@ -144,7 +148,7 @@ const setLists = useContext(DataContext).setLists;
       navigation.goBack();
       setLists(oldLists => {
 
-        let newLists = oldLists.filter(list => { return list.id !== route.params.listId});
+        let newLists = oldLists.filter(list => { return list.id !== route.params.list.id});
 
         console.log(newLists);
 
@@ -198,7 +202,7 @@ const setLists = useContext(DataContext).setLists;
        
         onPress={() => {
          
-          navigation.navigate("NewTask", { listId: route.params.listId });
+          navigation.navigate("NewTask", { listId: route.params.list.id });
         }}
       >
         {/* <Text style={styles.newListBtnText}>New list</Text> */}

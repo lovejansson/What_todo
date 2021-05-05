@@ -1,7 +1,5 @@
 import React, { useState, useRef } from "react";
 
-import Animated from "react-native-reanimated";
-
 import {
   Text,
   StyleSheet,
@@ -9,6 +7,9 @@ import {
   View,
   Dimensions,
 } from "react-native";
+
+import Emoji from 'react-native-emoji';
+
 
 
 const screen = Dimensions.get("window");
@@ -20,13 +21,14 @@ const styles = StyleSheet.create({
   container: {
 
     backgroundColor:"#fff",
-    width: screen.width / 2 - 36,
+    width: screen.width / 2 - 16,
     borderRadius: 8,
-    paddingVertical: 24,
-    paddingHorizontal: 24,
+    paddingVertical: 16,
+    paddingHorizontal:8,
+    flexDirection: "row",
+    alignItems: "center"
    
   },
-
   name: {
     fontSize: 18,
     fontWeight: "bold",
@@ -38,11 +40,16 @@ const styles = StyleSheet.create({
     fontStyle: "italic"
   },
 
+  emoji:{
+    fontSize: 40,
+    marginEnd: 8,
+  },
+
   icon: {
     position: "absolute",
     right: 0,
     top: 0,
-    marginHorizontal: 16,
+    
   },
 });
 
@@ -50,8 +57,11 @@ export default function ListItem({ item, onPress, onDelete }) {
   return (
    
  <Pressable style={styles.container} onPress={onPress}>
+   <Emoji style={styles.emoji} name={item.icon}/>
+   <View style={styles.info}>
    <Text style={styles.name}>{item.name}</Text>
    <Text style={styles.count}>{item.count} Tasks</Text>
+   </View>
   </Pressable>
 
   );

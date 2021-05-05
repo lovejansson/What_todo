@@ -112,9 +112,8 @@ const styles = StyleSheet.create({
   }
 });
 
-export default function Icons({ dismiss, setChosenIcon }) {
+export default function Icons({ dismiss }) {
   return (
-  
 
       <FlatList
       style={styles.container}
@@ -128,7 +127,7 @@ export default function Icons({ dismiss, setChosenIcon }) {
           <Text style={styles.title}>{item.title}</Text>
             <View style={styles.icons}>    
             {item.data.map(icon => <Pressable  onPress={() => {
-            dismiss();}}><Emoji style={styles.emoji} name={icon}/></Pressable>)}    
+            dismiss(icon);}}><Emoji style={styles.emoji} name={icon}/></Pressable>)}    
             </View>
           </View>)}}
 

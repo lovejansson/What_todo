@@ -51,41 +51,24 @@ export default function Home({navigation}) {
   function renderItem({item}){
     return (
       <ListItem item={item} onPress={() => {
-        navigation.navigate("List", {listName: item.name, listId: item.id});
+        navigation.navigate("List", {list: item});
       }} />
     )
   }
 
-  /*
-  
-  skola
-  arbete
-  filmer
-  räkningar
-  personliga mål
-  shopping
-  grocery list
-  calls
-  träning
-  
-  */
-
-
-
   return (
     
     <View style={styles.container}>
-      <Emoji style={{ fontSize: 48}} name="green_salad" />
-   
+
       {loading ? (
         <Text>Loading...</Text>
       ) : (
         <FlatList
-        style={{marginVertical: 24, marginStart: 24, marginEnd: 24 }}
+        style={{marginVertical: 16, marginStart: 8, marginEnd: 8 }}
           data={lists}
           renderItem={renderItem}
           numColumns={2}
-          columnWrapperStyle={{justifyContent: "space-between", marginBottom: 24}}
+          columnWrapperStyle={{justifyContent: "space-between", marginBottom: 16}}
           keyExtractor={(item) => item.id.toString()}
         />
       )}
