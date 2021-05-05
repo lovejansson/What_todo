@@ -14,19 +14,28 @@ import {
 const screen = Dimensions.get("window");
 
 const styles = StyleSheet.create({
+
+
+
   container: {
-    flexDirection: "row",
 
-    width: screen.width,
-
-    backgroundColor: "blue",
-  },
-  list: {
     backgroundColor:"#fff",
-    width: screen.width,
-    
-paddingVertical: 16,
-    zIndex: 1,
+    width: screen.width / 2 - 36,
+    borderRadius: 8,
+    paddingVertical: 24,
+    paddingHorizontal: 24,
+   
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4
+  },
+
+  count: {
+    fontSize: 16,
+    fontStyle: "italic"
   },
 
   icon: {
@@ -38,8 +47,12 @@ paddingVertical: 16,
 });
 
 export default function ListItem({ item, onPress, onDelete }) {
-  console.log(item);
   return (
- <Pressable style={styles.list} onPress={onPress}><Text>{item.name}</Text></Pressable>
+   
+ <Pressable style={styles.container} onPress={onPress}>
+   <Text style={styles.name}>{item.name}</Text>
+   <Text style={styles.count}>{item.count} Tasks</Text>
+  </Pressable>
+
   );
 }

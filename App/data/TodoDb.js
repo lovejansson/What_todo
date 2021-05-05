@@ -37,12 +37,15 @@ export default class TodoDb {
     createListsTable() {
       console.log("TodoDb: createListsTable")
       return new Promise((resolve, reject) => {
+
         this.db.transaction((tx) => {
+         
           tx.executeSql(
             `create table if not exists lists (
             id integer primary key autoincrement,
             name text not null,
-            icon text not null)`,
+            icon text not null,
+            count integer default 0)`,
             [],
             (tx, resultSet) => {
               resolve();
@@ -72,11 +75,21 @@ export default class TodoDb {
             [listId, description, dueDate, false],
             (tx, resultSet) => {
               console.log("BEFORE RESOLVE")
-              resolve(resultSet.insertId);
+
+              let insertedId = resultSet.insertId;
+
+              tx.executeSql(`update lists set count = count + 1 where id = ?`, [listId], (tx, resultSet)=>{
+                resolve(insertedId);
+
+              }, (tx, error)=>{
+                console.log("insertTask " + error);
+                reject(error);
+              })
+
             },
             (tx, error) => {
-              console.log("before reject")
-              console.log(tx);
+              console.log(tx)
+          
               console.log("insertTask " + error);
               reject(error);
             }
@@ -167,6 +180,28 @@ export default class TodoDb {
           );
         });
       });
+    }
+
+    deleteCompletedTasks(){ 
+      console.log("todoDb")
+      return new Promise((resolve, reject) => {
+   
+      this.db.transaction((tx) => {
+        tx.executeSql(
+          `delete from tasks where done = ?`,
+          [1],
+          (tx, resultSet) => {
+            console.log(tx);
+            resolve(resultSet.rowsAffected);
+          },
+          (tx, error) => {
+            console.log("deleteTask " + error);
+            reject(error);
+          }
+        );
+      });
+    });
+
     }
   
     ///////////

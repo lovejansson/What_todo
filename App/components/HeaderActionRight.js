@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
  * @props children : <Menu/>
  * 
  */
-export default function MenuRight({onPress}){
+export default function HeaderActionRight({onPress}){
 
     return (
        

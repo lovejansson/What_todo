@@ -83,6 +83,7 @@ export default function NewTask({ navigation, route }) {
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [hasSetDueDate, setHasSetDueDate] = useState(false);
+  const setLists = useContext(DataContext).setLists;
 
   console.log(route.params);
   console.log(show);
@@ -99,6 +100,19 @@ export default function NewTask({ navigation, route }) {
     console.log("new id " + newId);
     if(newId){
       console.log("updating old tasks")
+      setLists((oldLists) => {
+
+        return oldLists.map(list =>{
+
+          if(list.id === route.params.listId){
+            list.count += 1;
+         
+          }
+          return list;
+        })
+
+
+      })
       setTasks((oldTasks) => [
         ...oldTasks,
         { description: description, id: newId, done: false, dueDate: hasSetDueDate? dueDate : null },

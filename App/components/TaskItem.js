@@ -73,9 +73,9 @@ markera som klar -> stryks  över bock/fyrkant att kryssa i -> done
 
 meny för att radera alla delete list / edit list / delete completed tasks / delete all tasks
 
-drag and drop to order items 
-
 hemsida med overview över de listor som finns + ikoner för att göra nya listor
+
+drag and drop to order items 
 
 
 TESTA/styla innan resten 
@@ -132,8 +132,6 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
 
     async function updateTaskDone(newValue){
 
-      console.log(newValue)
-
       setTaskDone(newValue);
 
       try{
@@ -146,7 +144,7 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
       if(!res){
         console.error("updateTaskDone: task not updated");
       }else{
-        onUpdateDone();
+        onUpdateDone(newValue);
 
       }
 

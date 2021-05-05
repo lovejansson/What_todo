@@ -21,11 +21,8 @@ useEffect(() => {
     db.createListsTable().then(() => {
       db.createTasksTable().then(()=> {
         console.log("created tasks table")
-        
-       
             db.getLists()
             .then((res) => {
-             
               setLists(res);
               setLoading(false);
             })

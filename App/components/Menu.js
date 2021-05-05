@@ -1,7 +1,7 @@
 import React from "react";
 import Icon from "react-native-vector-icons/AntDesign";
 
-import {StyleSheet, TouchableOpacity, FlatList} from "react-native";
+import {StyleSheet, TouchableOpacity, FlatList, View} from "react-native";
 import MenuItem from "./MenuItem";
 
 /*
@@ -19,14 +19,19 @@ menu object: [{title, icon, action}, ]
 
 */ 
 
-// const styles = StyleSheet.create({
+const styles = StyleSheet.create({
 
-//     menuIcon: {
-//       color: "#000",
-//       transform: [{rotate: "90deg"}],
-//       marginEnd: 16,
-//     }
-//   });
+    container: {
+        position: "absolute",
+        right: 8,
+        top: 8,
+        backgroundColor: "#404040",
+        borderRadius: 16
+    
+    }
+  });
+
+
 
 /**
  * @props items :
@@ -43,6 +48,8 @@ export default function Menu({items}){
     }
 
     return (
+        <View  style={styles.container}>
         <FlatList data={items} keyExtractor={(item) => item.title}  
-        renderItem={renderItem}/>)
+        renderItem={renderItem}/>
+        </View>)
 }

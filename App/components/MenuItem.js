@@ -17,12 +17,16 @@ const styles = StyleSheet.create({
 
     container: {
       flexDirection: "row",
-      paddingVertical: 4,
+      alignItems: "center",
+      paddingVertical: 8,
+      paddingHorizontal: 16,
     },
     icon:{
       marginEnd: 8,
+      color: "#fff"
     },
     text: {
+      fontSize: 20,
       color: "#fff"
     }
   });
@@ -37,7 +41,7 @@ export default function MenuItem({content}){
 
     return (
         <TouchableOpacity style={styles.container} onPress={content.action}>
-          <Icon name={content.icon} size={24} style={styles.icon} />
-          <Text>{content.title}</Text>
+          <Icon name={content.icon} size={20} style={styles.icon} />
+          <Text style={styles.text}>{content.title}</Text>
           </TouchableOpacity>)
 }

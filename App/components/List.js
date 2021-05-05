@@ -4,14 +4,15 @@ import {
   Text,
   FlatList,
   StyleSheet,
-
+  Pressable,
   TouchableOpacity,
 } from "react-native";
 import { DataContext } from "../data/DataContext";
 import Icon from "react-native-vector-icons/AntDesign";
 import TaskItem from "../components/TaskItem";
-import MenuRight from "../components/MenuRight";
+import HeaderActionRight from "./HeaderActionRight";
 import Menu from "../components/Menu";
+import ConfirmationDialog from "../popups/ConfirmationDialog";
 import { useLayoutEffect } from "react";
 
 
@@ -35,60 +36,69 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 18,
   },
-  menu: {
+ overlay: {
     position: "absolute",
-    right: 16,
+    right: 0,
     top: 0,
-    height: 100,
-    width:100,
-    backgroundColor: "blue",
-
+    bottom: 0,
+    left: 0,
+    backgroundColor: "transparent"
 }
 });
 
-// swipe to delete list and task
-
-//  meny -> Delete list, Edit list, Ta bort alla tasks, ta bort alla som är klara 
-
-// edit list -> editlistmodal, remove completed tasks -> clears all tasks that is done
-
-// klicka på ett item -> edit description and reminder
 
 export default function List({ navigation, route }) {
 const db = useContext(DataContext).db;
 const setTasks= useContext(DataContext).setTasks;
+const setLists = useContext(DataContext).setLists;
  
   const setListId = useContext(DataContext).setListId;
   const loading = useContext(DataContext).loading;
 
   const tasks = useContext(DataContext).tasks;
 
-  const deleteList = {icon: "delete", title: "Delete list", action: ()=> console.log("delete list")};
-  const editList = {icon: "edit", title: "Edit list", action: ()=> console.log("edit list")};
-  const deleteCompleted =  {icon: "delete", title: "Delete completed tasks", action: ()=> console.log("delete completed tasks")};
 
-  const menuItems = [deleteList, editList,deleteCompleted ]
+  const deleteListItem = {icon: "delete", title: "Delete list", action: toggleShowConfirmationDialog};
+  const editListItem = {icon: "edit", title: "Edit list", action: ()=> console.log("todo edit list")};
+  const deleteCompletedItem =  {icon: "closecircleo", title: "Delete completed tasks", action: deleteCompletedTasks};
+
+  const menuItems = [deleteListItem, editListItem,deleteCompletedItem ]
 
   const [showMenu, setShowMenu] = useState(false);
+  const [showConfirmActionDialog, setShowConfirmationDialog] = useState(false);
 
-  function displayMenu(){
-      console.log("display menu")
-  
-      if(showMenu){
-        console.log("setting false")
-        setShowMenu(false);
+  function toggleShowMenu(){
+      setShowMenu(!showMenu);
+  }
 
-      }else{
-        console.log("settingtrue")
-        setShowMenu(true);
-      }
-      console.log(showMenu);
+  function toggleShowConfirmationDialog(){ 
+    setShowConfirmationDialog(!showConfirmActionDialog);
+  }
+
+  async function deleteCompletedTasks(){
+
+    toggleShowMenu();
+    
+    let deleted;
+
+    try{
+       deleted = await db.deleteCompletedTasks();
+    }catch(error){
+        console.log(error);
+    }
+
+
+    if(deleted){
+        let newTasks = tasks.filter(t => { return t.done === false || t.done === 0})
+        console.log(newTasks);
+        setTasks(newTasks);
+    }
+
   }
 
   useLayoutEffect(()=>{
-    navigation.setOptions({ title: route.params.listName,  headerRight: () => <MenuRight onPress={displayMenu}/>});
-
-  }, [])
+    navigation.setOptions({ title: route.params.listName,  headerRight: () => <HeaderActionRight onPress={toggleShowMenu}/>});
+  }, [showMenu])
 
 
 
@@ -119,32 +129,49 @@ const setTasks= useContext(DataContext).setTasks;
             return oldTasks.filter(t => { return t.id != task.id})
         });
     }
-
-
   }
-  
 
+  async function deleteList(){
+    let deleted;
 
-  console.log(tasks);
+    try{
+      deleted = await db.deleteList(route.params.listId);
+    }catch(error){
+      console.error(error);
+    }
+
+    if(deleted){
+      navigation.goBack();
+      setLists(oldLists => {
+
+        let newLists = oldLists.filter(list => { return list.id !== route.params.listId});
+
+        console.log(newLists);
+
+        return newLists;
+    });
+      console.log("deleted list")
+    }
+  }
 
   function renderItem({item}){
     return (
         <TaskItem
           item={item}
-          onUpdateDone={()=> {
-            console.log("onUpdateDone")
-            // setCurrentList({id: route.params.listId, done: !currentList.done})
+          onUpdateDone={(newValue)=> {
+
+            let idx = tasks.indexOf(item);
+            setTasks(oldTasks => {
+              oldTasks[idx].done = newValue;
+              return oldTasks;
+            })
             
           }}
           onPress={() => {
-            console.log("on press");
-            //navigation.navigate("List", { listId: item.id });
+       
           }}
           onDelete={()=>{
-            
-            
-            console.log("on delete")
-            
+          
             deleteTask(item);
         }}
         />
@@ -177,9 +204,13 @@ const setTasks= useContext(DataContext).setTasks;
         {/* <Text style={styles.newListBtnText}>New list</Text> */}
         <Icon style={styles.icon} name="plus" size={32} color="white" />
       </TouchableOpacity>
-      {true && <View style={styles.menu}>
-          <Menu items={menuItems}/>
-          </View>}
+
+      {showMenu && <Pressable onPress={toggleShowMenu} style={styles.overlay}><Menu items={menuItems}/></Pressable>}
+      {showConfirmActionDialog && 
+      <Pressable style={[styles.overlay, {zIndex: 4}]} onPress={toggleShowConfirmationDialog}>
+        <ConfirmationDialog title="Do you want to delete this list?" message="Deleting this list will
+      also delete all tasks." actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
+      </Pressable>}
     </View>
   );
 }
