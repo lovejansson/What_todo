@@ -1,6 +1,7 @@
 
 import React from "react"
-import {DataProvider} from "./data/DataContext";
+import {ColorThemeProvider} from "./contexts/ColorTheme";
+import {DataProvider} from "./contexts/Data";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import NewList from "./popups/NewList";
@@ -9,11 +10,11 @@ import Main from "./screens/Main";
 
 const Stack = createStackNavigator();
 
-
 export default function App() {
   return (
    
     <DataProvider>
+      <ColorThemeProvider>
       <NavigationContainer>
         <Stack.Navigator >
           <Stack.Screen
@@ -34,6 +35,7 @@ export default function App() {
           />
         </Stack.Navigator>
       </NavigationContainer>
+      </ColorThemeProvider>
     </DataProvider>
   );
 
