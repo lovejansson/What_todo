@@ -1,4 +1,4 @@
-import React, {  useContext, useLayoutEffect} from "react";
+import React, {  useContext, useLayoutEffect, useEffect} from "react";
 import {
   View,
   Text,
@@ -19,38 +19,52 @@ import HeaderActionRight from "./HeaderActionRight";
 
 const window = Dimensions.get("window");
 
+const styles = StyleSheet.create({
+
+  backgroundImage: {
+  flex: 1,
+    resizeMode:"contain", 
+  },
+  flatList: 
+    {
+    marginVertical: 16,
+    marginStart: 8,
+    marginEnd: 8,
+  },
+  column: {
+    justifyContent: "space-between", 
+    marginBottom: 16
+  },
+  button: {
+    position: "absolute",
+    borderRadius: 50,
+    end: 24,
+    bottom: 32,
+  },
+  icon: {
+    color: "#fff",
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+  },
+});
+
+
 export default function Home({navigation}) {
 
   const colors = useContext(ColorThemeContext).colors;
-
-  const styles = StyleSheet.create({
-
-    image: {
-    flex: 1,
-      resizeMode:"contain", 
-    },
-    button: {
-      position: "absolute",
-      backgroundColor: colors.mainButton,
-      borderRadius: 50,
-      end: 24,
-      bottom: 32,
-    },
-    icon: {
-      color: colors.icon,
-      paddingVertical: 18,
-      paddingHorizontal: 18,
-    },
-  });
-
   const lists = useContext(DataContext).lists;
-
-  const db = useContext(DataContext).db;
   const loading = useContext(DataContext).loading;
+
+  console.log(colors);
+
+  const iconStyle = [styles.icon, {color: colors.icon}];
+  const buttonStyle = [styles.button, {backgroundColor: colors.mainButton}];
+
 
   useLayoutEffect(()=>{
     navigation.setOptions({ title: "What todo", headerRight: () => <HeaderActionRight onPress={()=> { console.log("menu")}}/>});
   }, [])
+
 
   function renderItem({item}){
     return (
@@ -60,28 +74,28 @@ export default function Home({navigation}) {
     )
   }
 
+
   return (
-    <ImageBackground source={require("../images/background_black_even.png")}  style={styles.image}>
+    <ImageBackground source={require("../../images/background_black_even.png")} style={styles.backgroundImage}>
       {loading ? (
         <Text>Loading...</Text>
       ) : (
         <FlatList
-        style={{marginVertical: 16, marginStart: 8, marginEnd: 8 }}
+          style={styles.flatList}
           data={lists}
           renderItem={renderItem}
           numColumns={2}
-          columnWrapperStyle={{justifyContent: "space-between", marginBottom: 16}}
+          columnWrapperStyle={styles.column}
           keyExtractor={(item) => item.id.toString()}
         />
       )}
       <TouchableOpacity
-        style={styles.button}
+        style={buttonStyle}
         onPress={() => {
           navigation.navigate("NewList");
         }}
       >
-      
-      <Icon name="plus" size={32} style={styles.icon} color="white"></Icon>
+        <Icon name="plus" size={32} style={iconStyle}></Icon>
       </TouchableOpacity>
    
     </ImageBackground>

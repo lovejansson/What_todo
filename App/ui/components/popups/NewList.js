@@ -1,54 +1,55 @@
 import React, { useState, useContext, useEffect } from "react";
 import {
-  Text,
   View,
   TextInput,
   TouchableOpacity,
   StyleSheet,
   Modal,
-  ImageBackground
+  Dimensions,
+  Keyboard,
+  Pressable
 } from "react-native";
 
-import { DataContext } from "../data/DataContext";
+import { DataContext } from "../../../contexts/Data";
+import { ColorThemeContext } from "../../../contexts/ColorTheme";
 
 import Icons from "./Icons";
 import Icon from "react-native-vector-icons/AntDesign";
 import Emoji from 'react-native-emoji';
 
+const window = Dimensions.get("window");
+
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-    backgroundColor: "#121212"
-  },
-  inputContainer: {
-    backgroundColor: "#242424",
     justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 20,
   },
 
-  label:{
-    color: "#fff",
+  label: {
     fontSize: 20,
     fontWeight: "bold",
   },
 
-  inputName: {
-    backgroundColor: "#242424",
-    color: "#fff",
+  input: {
     fontSize: 20,
-    width: "100%",
-    marginBottom: 16,
+    width: window.width - 32,
+    margin: 16,
     padding: 16,
-
+    borderRadius: 8,
   },
 
-  buttonIcon: {
+  icon: {
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+  },
+
+  buttonIcons: {
     flexDirection: "row",
     alignItems: "center",
     marginEnd: 16,
-    alignSelf: "flex-end"
-
+    alignSelf: "flex-end",
+  
   },
 
   emoji: {
@@ -56,49 +57,39 @@ const styles = StyleSheet.create({
     marginEnd: 4,
   },
 
-  button: {
-    alignSelf: "flex-end",
-    margin: 16,
-  },
-  buttonDismiss: {
-    // backgroundColor: "red",
-    // position: "absolute",
-    // end: 24,
-    // top: 32,
-    // width: 32,
-    // height: 32,
-    // borderRadius: 50,
-  },
-  iconSave: {
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-  },
-  iconDismiss: {
-    color: "#000",
-    transform: [{ rotate: "45 deg" }],
-
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-  },
-
   buttonSave: {
-    backgroundColor: "red",
+    position: "absolute",
+    end: 24,
+    bottom: 24,
     borderRadius: 50,
-    marginTop: "auto",
   },
+
+  buttonClose: {
+    alignSelf: "flex-end",
+    marginVertical: 16,
+  }
+
+
 });
 
 export default function NewList({ navigation, route}) {
+  const colors = useContext(ColorThemeContext).colors;
   const db = useContext(DataContext).db;
   const setLists = useContext(DataContext).setLists;
 
-   const [showIconsPopup, setShowIconsPopup] = useState(false);
+  const [showIconsPopup, setShowIconsPopup] = useState(false);
   const [chosenIcon, setChosenIcon] = useState("memo");
   const [chosenListName, setChosenListName] = useState("");
 
+  const containerStyle = [styles.container, {backgroundColor: colors.background}];
+  const inputStyle= [styles.input, {backgroundColor: colors.background2, color: colors.text}];
+  const buttonSaveStyle = [styles.buttonSave, {backgroundColor: colors.mainButton}];
+  const buttonCloseStyle = [styles.buttonClose, {color: colors.textButton}];
+  const iconStyle = [styles.icon, {color: colors.icon}];
+  const labelStyle = [styles.label, {color: colors.text}];
+
   useEffect(()=>{
     if(route.params){
-
       setChosenIcon(route.params.list.icon);
       setChosenListName(route.params.list.name);
     }
@@ -120,8 +111,8 @@ export default function NewList({ navigation, route}) {
           return oldLists;
           
         }
-        );
-      }
+      );
+    }
     }else{
       let newId = await db.insertList(chosenListName, chosenIcon);
       setLists((oldLists) => [
@@ -132,40 +123,42 @@ export default function NewList({ navigation, route}) {
     }
   }
 
+  function dismissKeyboard(){
+    Keyboard.dismiss();
+  }
+
   return (
-    <View style={styles.container}>
+    <Pressable style={containerStyle} onPress={dismissKeyboard}>
       <Modal
         animationType="fade"
         transparent={true}
         visible={showIconsPopup}
-        onRequestClose={() => setShowIconsPopup(false)}
-      >
+        onRequestClose={() => setShowIconsPopup(false)}>
         <Icons
           dismiss={(icon) => {
             if(icon){
               setChosenIcon(icon);
             }
-         
             setShowIconsPopup(false);
           }}
         />
       </Modal>
 
       <TouchableOpacity
-        style={styles.button}
+      style={buttonCloseStyle}
         onPress={() => {
           navigation.goBack();
-        }}
-      >
-        <Icon style={styles.iconDismiss} name="plus" size={32} color="black"></Icon>
+        }}>
+        <Icon style={iconStyle} name="close" size={32}></Icon>
       </TouchableOpacity>
-    <View>
+      
+      <View>
         <TextInput
-          style={styles.inputName}
+          style={inputStyle}
           value = {chosenListName}
           placeholder="Name"
-          placeholderTextColor="#fff"
-        selectionColor="#fff"
+          placeholderTextColor={colors.text}
+          selectionColor={colors.text}
           keyboardType="ascii-capable"
           onChangeText={(value) => {
             setChosenListName(value);
@@ -173,26 +166,26 @@ export default function NewList({ navigation, route}) {
         />
 
       <TouchableOpacity
-      style={styles.buttonIcon}
+      style={styles.buttonIcons}
           onPress={() => {
             setShowIconsPopup(true);
           }}
         >
           <Emoji name={chosenIcon} style={styles.emoji}/>
-          <Icon name="down" size={24} color="#fff"/>
+          <Icon name="down" size={24} color={colors.icon}/>
         </TouchableOpacity>
-        </View>
+
+      </View>
 
       <TouchableOpacity
-        style={[styles.button, styles.buttonSave]}
+        style={buttonSaveStyle}
         onPress={() => {
           saveList();
           navigation.goBack();
         }}
-      >
-        <Icon style={styles.iconSave} name="check" size={32} color="black"></Icon>
-      
+        >
+        <Icon style={iconStyle} name="check" size={32}></Icon>
       </TouchableOpacity>
-    </View>
+    </Pressable>
   );
 }

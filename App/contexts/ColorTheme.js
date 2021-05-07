@@ -7,7 +7,7 @@ export const ColorThemeProvider = ({children}) => {
 
   const [theme, setTheme] = useState("dark");
 
-  const [colors, setColors] = useState(null);
+  const [colors, setColors] = useState(colorsDarkTheme);
 
   useEffect(()=>{
 

@@ -1,18 +1,16 @@
-import React from "react";
+import React, {useContext} from "react";
 import {
   Text,
   StyleSheet,
   Dimensions,
   Pressable,
   View,
- 
   FlatList,
-  Touchable,
   TouchableOpacity,
 } from "react-native";
 import Emoji from 'react-native-emoji';
-
 import Icon from "react-native-vector-icons/AntDesign";
+import { ColorThemeContext } from "../../../contexts/ColorTheme";
 
 const window = Dimensions.get("window");
 
@@ -87,36 +85,32 @@ const icons = [
   }
 ];
 
-console.log(icons);
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#242424",
     padding: 16,
-  
+    flex: 1,
   },
 
   title: {
-    color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 4,
-
   },
 
-  icon: {
+  closeIcon: {
     color:"#fff",
     alignSelf: "flex-end",
-    marginBottom: 16,
-
-
+    marginVertical: 16
   },
+
   icons: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 24,
 
   },
+
   emoji: {
     fontSize: 32,
     paddingHorizontal: 4,
@@ -125,34 +119,41 @@ const styles = StyleSheet.create({
 });
 
 export default function Icons({ dismiss }) {
-  return (
 
-    <View  style={styles.container}>
+  const colors = useContext(ColorThemeContext).colors;
+  const containerStyle = [styles.container, {backgroundColor: colors.background}];
+  const titleStyle = [styles.title, {color: colors.heading}];
+  const closeIconStyle = [styles.closeIcon, {color: colors.icon}];
+
+  function renderItem({item}){
+    return(
+      <View>
+        <Text style={titleStyle}>{item.title}</Text>
+        
+        <View style={styles.icons}>    
+          
+          {item.data.map(icon => {
+         return(<Pressable onPress={() => {dismiss(icon);}}>
+              <Emoji style={styles.emoji} name={icon}/>
+          </Pressable>)})}  
+
+        </View>
+      </View>);
+  }
+
+  return (
+    <View style={containerStyle}>
       <TouchableOpacity onPress={()=>{
         dismiss()
       }}>
-      <Icon name="close" size={32}style={styles.icon}/>
+        <Icon name="close" size={32} style={closeIconStyle}/>
       </TouchableOpacity>
+
       <FlatList
-     
-      data = {icons}
-      renderItem  = {({item}) => {
-        console.log("render icon list")
-        console.log(item)
-      
-        return(
-          <View>
-          <Text style={styles.title}>{item.title}</Text>
-            <View style={styles.icons}>    
-            {item.data.map(icon => <Pressable  onPress={() => {
-            dismiss(icon);}}><Emoji style={styles.emoji} name={icon}/></Pressable>)}    
-            </View>
-          </View>)}}
+      data={icons}
+      renderItem={renderItem}
+      keyExtractor={(item, idx) => (item.title + idx).toString()}/>
 
-      keyExtractor={(item, idx)=> item.title}
-
-      />
       </View>
-
   );
 }

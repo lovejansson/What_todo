@@ -6,34 +6,33 @@ import {
   StyleSheet,
   Pressable,
   TouchableOpacity,
-  ImageBackground
+  ImageBackground,
+  requireNativeComponent
 } from "react-native";
-import { DataContext } from "../data/DataContext";
+import { DataContext } from "../../contexts/Data";
+import {ColorThemeContext} from "../../contexts/ColorTheme";
 import Icon from "react-native-vector-icons/AntDesign";
-import TaskItem from "../components/TaskItem";
+import TaskItem from "./TaskItem";
+import ListHeaderTitle from "./ListHeaderTitle";
 import HeaderActionRight from "./HeaderActionRight";
-import Menu from "../components/Menu";
-import ConfirmationDialog from "../popups/ConfirmationDialog";
+import Menu from "./Menu";
+import ConfirmAction from "./popups/ConfirmAction";
 import { useLayoutEffect } from "react";
 
 
 
 const styles = StyleSheet.create({
-  image: {
+  container: {
     flex: 1,
-        resizeMode:"contain",
-       
+    paddingVertical: 16,   
     },
   button: {
     position: "absolute",
-    backgroundColor: "#7cb2f0",
     borderRadius: 50,
     end: 24,
     bottom: 32,
   },
   icon: {
-    color: "#fff",
-
     paddingVertical: 18,
     paddingHorizontal: 18,
   },
@@ -49,6 +48,7 @@ const styles = StyleSheet.create({
 
 
 export default function List({ navigation, route }) {
+const colors = useContext(ColorThemeContext).colors;
 const db = useContext(DataContext).db;
 const setTasks= useContext(DataContext).setTasks;
 const setLists = useContext(DataContext).setLists;
@@ -57,6 +57,10 @@ const setLists = useContext(DataContext).setLists;
   const loading = useContext(DataContext).loading;
 
   const tasks = useContext(DataContext).tasks;
+
+  const iconStyle = [styles.icon, {color: colors.icon}];
+  const buttonStyle= [styles.button, {backgroundColor: colors.mainButton}];
+  const containerStyle = [styles.container, {backgroundColor: colors.background}]
 
 
   const deleteListItem = {icon: "delete", title: "Delete list", action: toggleShowConfirmationDialog};
@@ -102,7 +106,8 @@ const setLists = useContext(DataContext).setLists;
   }
 
   useLayoutEffect(()=>{
-    navigation.setOptions({ title: route.params.list.name,  headerRight: () => <HeaderActionRight onPress={toggleShowMenu}/>});
+    navigation.setOptions({ headerStyle: {backgroundColor: "#fff"}, headerTitle: props => <ListHeaderTitle {...props} title={route.params.list.name} 
+    emoji={route.params.list.icon}/>, headerRight: () => <HeaderActionRight onPress={toggleShowMenu}/>});
   }, [showMenu])
 
 
@@ -164,29 +169,24 @@ const setLists = useContext(DataContext).setLists;
         <TaskItem
           item={item}
           onUpdateDone={(newValue)=> {
-
             let idx = tasks.indexOf(item);
             setTasks(oldTasks => {
               oldTasks[idx].done = newValue;
               return oldTasks;
-            })
-            
+            })  
           }}
           onPress={() => {
        
           }}
           onDelete={()=>{
-          
             deleteTask(item);
         }}
         />
       );
-
-
   }
 
   return (
-    <ImageBackground source={require("../images/background_black_even.png")}  style={styles.image}>
+    <View style={containerStyle}>
 
       {loading ? (
         <Text>Loading...</Text>
@@ -199,23 +199,23 @@ const setLists = useContext(DataContext).setLists;
       )}
 
       <TouchableOpacity
-        style={styles.button}
-       
+        style={buttonStyle}
         onPress={() => {
-         
           navigation.navigate("NewTask", { listId: route.params.list.id });
-        }}
-      >
-        {/* <Text style={styles.newListBtnText}>New list</Text> */}
-        <Icon style={styles.icon} name="plus" size={32} color="white" />
+        }}>
+          <Icon style={iconStyle} name="plus" size={32} color="white" />
       </TouchableOpacity>
 
-      {showMenu && <Pressable onPress={toggleShowMenu} style={styles.overlay}><Menu items={menuItems}/></Pressable>}
+      {showMenu && 
+        <Pressable onPress={toggleShowMenu} style={styles.overlay}>
+          <Menu items={menuItems}/>
+        </Pressable>}
+     
       {showConfirmActionDialog && 
       <Pressable style={[styles.overlay, {zIndex: 4}]} onPress={toggleShowConfirmationDialog}>
-        <ConfirmationDialog title="Do you want to delete this list?" message="Deleting this list will
+        <ConfirmAction title="Do you want to delete this list?" message="Deleting this list will
       also delete all tasks." actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
       </Pressable>}
-    </ImageBackground>
+    </View>
   );
 }

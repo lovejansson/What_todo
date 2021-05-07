@@ -25,8 +25,12 @@ const styles = StyleSheet.create({
         position: "absolute",
         right: 8,
         top: 8,
-        backgroundColor: "#404040",
-        borderRadius: 16
+        backgroundColor: "#282828",
+        borderRadius: 8,
+        borderColor: "#000",
+        borderStyle: "solid",
+        borderBottomWidth: 2,
+        borderEndWidth: 2,
     
     }
   });

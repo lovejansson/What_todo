@@ -4,9 +4,9 @@ import {ColorThemeProvider} from "./contexts/ColorTheme";
 import {DataProvider} from "./contexts/Data";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import NewList from "./popups/NewList";
-import NewTask from "./popups/NewTask";
-import Main from "./screens/Main";
+import NewList from "./ui/components/popups/NewList.js";
+import NewTask from "./ui/components/popups/NewTask.js";
+import Main from "./ui/screens/Main";
 
 const Stack = createStackNavigator();
 

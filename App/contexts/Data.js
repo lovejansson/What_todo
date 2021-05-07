@@ -1,13 +1,11 @@
 import React, { useState, createContext, useEffect } from "react";
-import TodoDb from "./TodoDb";
+import TodoDb from "../db/TodoDb";
 import {openDatabase} from "react-native-sqlite-storage";
 
 
 export const DataContext = createContext();
 
 export const DataProvider = (props) => {
-
-
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);

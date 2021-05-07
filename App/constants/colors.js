@@ -4,6 +4,12 @@ mainButton: "#7cb2f0",
 text: "#fff",
 heading: "#fff",
 icon: "#fff",
+buttonText: "#fff",
+background: "#121212",
+background2: "#282828",
+error: "#cf6679",
+check: "#4fcb8a",
+uncheck: "#fff"
 
 
 });
@@ -13,4 +19,11 @@ export const colorsLightTheme = Object.freeze({
     text: "#000",
     heading:"#000",
     icon: "#000",
+    buttonText: "#fff",
+    background: "#fff",
+    background2: "#fff",
+    error: "#cf6679",
+    check: "#4fcb8a",
+    uncheck: "#000",
+
 });

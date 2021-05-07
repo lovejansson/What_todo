@@ -6,75 +6,60 @@ import {
   Button,
   TouchableOpacity,
   StyleSheet,
-  Platform
+  Platform,
+  Dimensions,
+  Pressable,
+  Keyboard
 } from "react-native";
 
 import Icon from "react-native-vector-icons/AntDesign";
-import { DataContext } from "../data/DataContext";
+
+import { DataContext } from "../../../contexts/Data";
+import { ColorThemeContext } from "../../../contexts/ColorTheme";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+const window = Dimensions.get("window")
+
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-  },
-  inputContainer: {
-    backgroundColor: "green",
-
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-start",
   },
 
-  inputDescription: {
-    backgroundColor: "yellow",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    marginTop: 20,
+  label: {
     fontSize: 20,
-    width: "90%",
+    fontWeight: "bold",
   },
-  inputIcon: {
-    backgroundColor: "yellow",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginBottom: 20,
+
+  input: {
     fontSize: 20,
-    width: "90%",
-  },
-  inputIconText: {
-    fontSize: 20,
-  },
-  button: {
-    alignSelf: "flex-end",
+    width: window.width - 32,
     margin: 16,
+    padding: 16,
+    borderRadius: 8,
   },
-  buttonDismiss: {
-    // backgroundColor: "red",
-    // position: "absolute",
-    // end: 24,
-    // top: 32,
-    // width: 32,
-    // height: 32,
-    // borderRadius: 50,
-  },
-  iconSave: {
+
+  icon: {
     paddingVertical: 18,
     paddingHorizontal: 18,
   },
-  iconDismiss: {
-    color: "#000",
-    transform: [{ rotate: "45 deg" }],
-
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-  },
 
   buttonSave: {
-    backgroundColor: "red",
+    position: "absolute",
+    end: 24,
+    bottom: 24,
     borderRadius: 50,
-    marginTop: "auto",
   },
+
+  buttonClose: {
+    alignSelf: "flex-end",
+    marginVertical: 16,
+  }
+
+
 });
+
 
 export default function NewTask({ navigation, route }) {
   const db = useContext(DataContext).db;
@@ -84,6 +69,14 @@ export default function NewTask({ navigation, route }) {
   const [show, setShow] = useState(false);
   const [hasSetDueDate, setHasSetDueDate] = useState(false);
   const setLists = useContext(DataContext).setLists;
+
+  const colors = useContext(ColorThemeContext).colors;
+  const containerStyle = [styles.container, {backgroundColor: colors.background}];
+  const inputStyle= [styles.input, {backgroundColor: colors.background2, color: colors.text}];
+  const buttonSaveStyle = [styles.buttonSave, {backgroundColor: colors.mainButton}];
+  const buttonCloseStyle = [styles.buttonClose, {color: colors.textButton}];
+  const iconStyle = [styles.icon, {color: colors.icon}];
+  const labelStyle = [styles.label, {color: colors.text}];
 
   console.log(route.params);
   console.log(show);
@@ -165,29 +158,35 @@ export default function NewTask({ navigation, route }) {
   //   return date.toLocaleTimeString().slice(0, 5);
   // }
 
+  function dismissKeyboard(){
+    Keyboard.dismiss();
+  }
 
 
 
   return (
-    <View style={styles.container}>
+    <Pressable style={containerStyle} onPress={dismissKeyboard}>
       <TouchableOpacity
-        style={styles.button}
+        style={buttonCloseStyle}
         onPress={() => {
           navigation.goBack();
         }}
       >
         <Icon
-          style={styles.iconDismiss}
-          name="plus"
+          style={iconStyle}
+          name="close"
           size={36}
-          color="#000"
         />
       </TouchableOpacity>
-      <View style={styles.inputContainer}>
+      <View >
         <TextInput
-          style={styles.inputDescription}
+          // style={inputStyle}
+          style={inputStyle}
           placeholder="What todo..."
           keyboardType="ascii-capable"
+          placeholderTextColor={colors.text}
+          selectionColor={colors.text}
+          multiline={true}
           
           onChangeText={(value) => {
             setDescription(value);
@@ -212,7 +211,7 @@ export default function NewTask({ navigation, route }) {
       </View>
 
       <TouchableOpacity
-        style={[styles.button, styles.buttonSave]}
+        style={buttonSaveStyle}
         onPress={async() => {
           console.log("onpress")
            saveTask();
@@ -220,13 +219,13 @@ export default function NewTask({ navigation, route }) {
         }}
       >
         <Icon
-          style={styles.iconSave}
+          style={iconStyle}
           name="check"
           size={32}
           color="black"
         />
       </TouchableOpacity>
-      {show  && (
+      {/* {show  && (
         <DateTimePicker
           testID="dateTimePicker"
           value={dueDate}
@@ -235,7 +234,7 @@ export default function NewTask({ navigation, route }) {
           display="spinner"
           onChange={onChangeDueDate}
         />
-      )}
-    </View>
+      )} */}
+    </Pressable>
   );
 }
