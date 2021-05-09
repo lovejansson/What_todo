@@ -1,8 +1,7 @@
-import React from "react";
-import Icon from "react-native-vector-icons/AntDesign";
-
+import React, { useContext } from "react";
 import {StyleSheet, TouchableOpacity, FlatList, View} from "react-native";
 import MenuItem from "./MenuItem";
+import {ColorThemeContext} from "../../contexts/ColorTheme";
 
 /*
 
@@ -23,10 +22,8 @@ const styles = StyleSheet.create({
 
     container: {
         position: "absolute",
-        right: 8,
-        top: 8,
-        backgroundColor: "#282828",
-        borderRadius: 8,
+        right: 4,
+        top: 4,
         borderColor: "#000",
         borderStyle: "solid",
         borderBottomWidth: 2,
@@ -43,7 +40,9 @@ const styles = StyleSheet.create({
  */
 export default function Menu({items}){
 
-    console.log(items)
+    const colors = useContext(ColorThemeContext).colors;
+
+    const containerStyle = [styles.container, {backgroundColor: colors.background2}];
 
     function renderItem({item}){
         return(
@@ -52,8 +51,9 @@ export default function Menu({items}){
     }
 
     return (
-        <View  style={styles.container}>
+        <View  style={containerStyle}>
         <FlatList data={items} keyExtractor={(item) => item.title}  
         renderItem={renderItem}/>
-        </View>)
+        </View>
+        )
 }

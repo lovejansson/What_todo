@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 16,
     },
     icon:{
-      marginEnd: 8,
+      marginEnd: 16,
       color: "#fff"
     },
     text: {
@@ -36,8 +36,6 @@ const styles = StyleSheet.create({
  * {icon: AntDesign 'name' attribute, title: description of item, action: Function to execute when selected }
  */
 export default function MenuItem({content}){
-  console.log("CONTENT")
-  console.log(content)
 
     return (
         <TouchableOpacity style={styles.container} onPress={content.action}>

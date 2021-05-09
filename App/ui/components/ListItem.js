@@ -6,6 +6,7 @@ import {
   Pressable,
   View,
   Dimensions,
+  ImageBackground
 } from "react-native";
 
 import Emoji from 'react-native-emoji';
@@ -22,7 +23,11 @@ const styles = StyleSheet.create({
 
     backgroundColor:"#fff",
     width: screen.width / 2 - 16,
-    borderRadius: 8,
+  
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderStyle: "solid",
+    borderColor:"#121212",
     paddingVertical: 16,
     paddingHorizontal:8,
     flexDirection: "row",
@@ -56,6 +61,8 @@ const styles = StyleSheet.create({
 export default function ListItem({ item, onPress, onDelete }) {
   return (
    
+    <ImageBackground source={require("../../images/background_black_row.png")}imageStyle={{resizeMode: "cover"}} 
+    style={{flex: 1}}>
  <Pressable style={styles.container} onPress={onPress}>
    <Emoji style={styles.emoji} name={item.icon}/>
    <View style={styles.info}>
@@ -63,6 +70,7 @@ export default function ListItem({ item, onPress, onDelete }) {
    <Text style={styles.count}>{item.count} Tasks</Text>
    </View>
   </Pressable>
+  </ImageBackground>
 
   );
 }

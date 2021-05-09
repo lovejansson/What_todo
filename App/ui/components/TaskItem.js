@@ -5,6 +5,7 @@ import {
   Pressable,
   Dimensions,
   View,
+  ImageBackground
 } from "react-native";
 import CheckBox from '@react-native-community/checkbox';
 
@@ -21,38 +22,41 @@ const screen = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "center",
+ 
     width: screen.width,
   },
   content: {
-    width: screen.width * 0.9,
+    width: screen.width,
+    height: 90,
     flexDirection: "row",
     alignItems: "center",  
-    marginStart: screen.width * 0.05, 
-    borderRadius: 8,
-    zIndex: 1,
- 
-    
+    zIndex: 1,  
+   
   },
   description: {
     fontSize: 16,
-    maxWidth: "85%",
-    paddingVertical: 24,
+    width: screen.width * 0.75,
   },
+  
   actionRight:{
-    width: screen.width * 0.9,
-    marginStart: screen.width * 0.05, 
-    borderRadius: 8,
+    height: 90,
+    width: screen.width,
     position: "absolute",
-    zIndex: 0
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    zIndex: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   deleteIcon:{
-      width: 32,
-      position:"absolute",
-      top: 0,
-      right: 16,
-      transform: [{translateY: -16}],   
-      zIndex: 0,
+      marginEnd: 16,
+      padding: 8,
+      borderRightWidth: 1,
+      borderBottomWidth: 1,
+     
   },
   checkbox: {
     marginHorizontal: 16,
@@ -76,7 +80,9 @@ bakgrundsbild -> done
 
 themes -> pågående
 
-custom header, byta teman, göra bättre kod angående uppdatera data -> helgen 
+custom header, byta teman, -> pågående
+
+göra bättre kod angående uppdatera data -> helgen 
 
 testa komponenter -> nästa vecka 
 
@@ -94,9 +100,9 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
 
   const colors = useContext(ColorThemeContext).colors;
 
-  let contentStyle = [styles.content, {backgroundColor: colors.background2}];
-  let actionRightStyle = [styles.actionRight, {backgroundColor: "#000"}];
-  const deleteIconStyle = [styles.deleteIcon, {color: colors.error}];
+  let contentStyle = [styles.content, {backgroundColor: colors.background}];
+  let actionRightStyle = [styles.actionRight, {backgroundColor: colors.background2}];
+  const deleteIconStyle = [styles.deleteIcon, {color: "#c8c8c8", backgroundColor: colors.background2, borderColor: "#000"}];
   const checkBoxColors = {true: colors.check, false: colors.uncheck};
 
  
@@ -104,10 +110,6 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
   const db = useContext(DataContext).db;
    const [taskDone, setTaskDone] = useState(item.done === 1? true : false);
    const [descriptionStyle, setDescriptionStyle] = useState([styles.description, {color: colors.text}]);
-
- 
-   // const [dateStyle, setDateStyle] = useState(styles.description);
- 
 
     useEffect(()=>{
 
@@ -121,21 +123,6 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
 
 
     }, [taskDone])
-
-    // useEffect(()=>{
-
-    //   if(item.dueDate && isPassedDueDate(new Date(item.dueDate))){
-
-      
-    //     setDateStyle([{color: "red"}]);
-
-      
-    //   }else{
-    //     setDateStyle([]);
-    //   }
-
-
-    // }, [])
 
     async function updateTaskDone(newValue){
 
@@ -156,11 +143,9 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
       }
 
     }
-
-    const numLines = (item.description.length / 20) < 1 ? 1 : Math.floor(item.description.length / 20);
    
     const transX = useSharedValue(0);
-    const height = useSharedValue("100%");
+    const height = useSharedValue(100);
     const opacity = useSharedValue(1);
 
     function adjustHeight(event){
@@ -168,11 +153,16 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
 
   
       console.log(event.nativeEvent.layout)
+      console.log(height.value);
 
-      height.value = event.nativeEvent.layout.height + 24;
+      if(height.value === "100%"){
+        height.value = event.nativeEvent.layout.height;
 
-      contentStyle = [contentStyle, {height: event.nativeEvent.layout.height}];
-      actionRightStyle = [actionRightStyle, {height: event.nativeEvent.layout.height}];
+        contentStyle = [contentStyle, {height: event.nativeEvent.layout.height}];
+        actionRightStyle = [actionRightStyle, {height: event.nativeEvent.layout.height}];
+      }
+
+ 
     }
    
 
@@ -202,42 +192,6 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
     })
 
 
-  // function toTimeString(date){
-
-  //   return date.toLocaleTimeString().slice(0, 5);
-
-  // }
-
-  //  function toDisplayDate(date){
-  //    let dateObj = new Date(date);
-  //    if(isToday(dateObj)){
-  //      return `Today ${toTimeString(dateObj)}`;
-  //    }
-  //    else {
-  //      return `${dateObj.toDateString()} ${toTimeString(dateObj)}`;
-  //    }
-  //  }
-
-  //  function isToday(date){
-
-  //   console.log(date);
-
-  //   let today = new Date();
- 
-
-  //   return date.getFullYear() === today.getFullYear() &&
-  //         date.getMonth() === today.getMonth() &&
-  //         date.getDate() === today.getDate();
-
-  //  }
-
-
-  //  function isPassedDueDate(date){
-  //    let now = new Date();
-
-  //   return now.getTime() >= date.getTime();
-  //  }
-
     const gestureHandler = useAnimatedGestureHandler({
         onStart: (event, ctx) => {         
           },
@@ -251,12 +205,14 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
           },
           onEnd: (event, ctx) => {
           
-            if(event.translationX < (screen.width * -0.5)){
+            if(event.translationX < (screen.width * -0.6)){
                     transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
 
                     opacity.value = withSpring(0, {damping: 5, overshootClamping: true}, ()=>{
+
+                      console.log("before with timing")
                      
-                      height.value = withSpring(0, {damping: 5, overshootClamping: true},runOnJS(onDelete));
+                      height.value =  withSpring(0, {damping: 2, overshootClamping: true}, runOnJS(onDelete));
                     });
                    
                    
@@ -268,6 +224,8 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
           },
 
     });
+
+    console.log(require("../../images/background_black_row.png"))
 
   return (
    
@@ -283,7 +241,7 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
               onPress={() => {
                 onPress();
               }}>
-            <Text style={descriptionStyle} onLayout={adjustHeight}>{item.description}</Text>
+            <Text style={descriptionStyle} numberOfLines={3} ellipsizeMode="tail" onLayout={adjustHeight}>{item.description}</Text>
           
             </Pressable>
           </View>
@@ -291,11 +249,11 @@ export default function TaskItem({ item, onPress, onDelete, onUpdateDone }) {
 
       </PanGestureHandler>
       
-      <Animated.View style={[actionRightStyle, animatedOpacity]}>
-      
-        <Icon style={deleteIconStyle} name="delete" size={32} />
-
+      <ImageBackground source={require("../../images/background_black_row.png")} imageStyle={{resizeMode: "cover"}} style={actionRightStyle} >
+      <Animated.View style={animatedOpacity}>
+        <Icon style={deleteIconStyle} name="delete" size={28} />
       </Animated.View>
+      </ImageBackground>
   
     </Animated.View>
 );}

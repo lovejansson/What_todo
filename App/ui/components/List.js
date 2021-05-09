@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Pressable,
   TouchableOpacity,
+  StatusBar,
   ImageBackground,
   requireNativeComponent
 } from "react-native";
@@ -13,8 +14,9 @@ import { DataContext } from "../../contexts/Data";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 import Icon from "react-native-vector-icons/AntDesign";
 import TaskItem from "./TaskItem";
-import ListHeaderTitle from "./ListHeaderTitle";
+import ListHeader from "./ListHeader";
 import HeaderActionRight from "./HeaderActionRight";
+import NewTask from "./NewTask.js";
 import Menu from "./Menu";
 import ConfirmAction from "./popups/ConfirmAction";
 import { useLayoutEffect } from "react";
@@ -22,10 +24,13 @@ import { useLayoutEffect } from "react";
 
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
-    paddingVertical: 16,   
+      resizeMode:"cover", 
     },
+
+    container: {flex: 1},
+
   button: {
     position: "absolute",
     borderRadius: 50,
@@ -106,8 +111,9 @@ const setLists = useContext(DataContext).setLists;
   }
 
   useLayoutEffect(()=>{
-    navigation.setOptions({ headerStyle: {backgroundColor: "#fff"}, headerTitle: props => <ListHeaderTitle {...props} title={route.params.list.name} 
-    emoji={route.params.list.icon}/>, headerRight: () => <HeaderActionRight onPress={toggleShowMenu}/>});
+    navigation.setOptions({ headerShown: false, headerStyle: {backgroundColor: "#0000"}, headerTitle: props => 
+    <ListHeaderTitle {...props} title={route.params.list.name} 
+    emoji={route.params.list.icon}/>});
   }, [showMenu])
 
 
@@ -186,25 +192,27 @@ const setLists = useContext(DataContext).setLists;
   }
 
   return (
+   
     <View style={containerStyle}>
+      {/* // <ImageBackground source={require("../../images/background_black_even.png")} style={styles.backgroundImage}> */}
+      <StatusBar backgroundColor={colors.background}/>
+      <ListHeader name={route.params.list.name} emoji={route.params.list.icon} navigation={navigation}
+      actionRight={toggleShowMenu} />
 
+<View style={{flex: 1}}>
       {loading ? (
         <Text>Loading...</Text>
       ) : (
         <FlatList
+
           data={tasks}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString() }
         />
       )}
+      </View>
 
-      <TouchableOpacity
-        style={buttonStyle}
-        onPress={() => {
-          navigation.navigate("NewTask", { listId: route.params.list.id });
-        }}>
-          <Icon style={iconStyle} name="plus" size={32} color="white" />
-      </TouchableOpacity>
+      <NewTask list={route.params.list}/>
 
       {showMenu && 
         <Pressable onPress={toggleShowMenu} style={styles.overlay}>
@@ -213,9 +221,10 @@ const setLists = useContext(DataContext).setLists;
      
       {showConfirmActionDialog && 
       <Pressable style={[styles.overlay, {zIndex: 4}]} onPress={toggleShowConfirmationDialog}>
-        <ConfirmAction title="Do you want to delete this list?" message="Deleting this list will
-      also delete all tasks." actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
+        <ConfirmAction title="Do you want to delete this list?" message="The added items will also be deleted." actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
       </Pressable>}
-    </View>
+     {/* </ImageBackground> */}
+      </View>
+ 
   );
 }

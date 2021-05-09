@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useContext} from "react";
 import { View, Text, StyleSheet, Dimensions, ImageBackground, TouchableOpacity} from "react-native";
 import {ColorThemeContext} from "../../../contexts/ColorTheme";
 
@@ -11,10 +11,13 @@ const styles = StyleSheet.create({
         left: window.width / 2,
         width: 240,
         transform: [{translateX: -120}],
-        backgroundColor: "#404040",
         paddingVertical: 16,
         paddingHorizontal: 24,
-        borderRadius: 16
+       
+        borderColor: "#000",
+        borderStyle: "solid",
+        borderBottomWidth: 2,
+        borderEndWidth: 2,
     },
 
     title: {
@@ -45,7 +48,7 @@ export default function ConfirmationDialog({title, message, actionOk, actionCanc
     const titleStyle = [styles.title, {color: colors.heading}];
     const messageStyle = [styles.message, {color: colors.text}];
     const buttonStyle = [styles.button, {color: colors.buttonText}];
-    const containerStyle = [styles.container, {backgroundColor: colors.background}];
+    const containerStyle = [styles.container, {backgroundColor: colors.background2}];
 
     return(
         <View style={containerStyle}>
