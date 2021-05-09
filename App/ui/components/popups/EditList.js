@@ -12,13 +12,12 @@ import {
 
 import { DataContext } from "../../../contexts/Data";
 import { ColorThemeContext } from "../../../contexts/ColorTheme";
-import { NotificationContext } from "../../../contexts/Notification";
+import {NotificationContext} from "../../../contexts/Notification";
 
 import Icons from "./Icons";
 import Icon from "react-native-vector-icons/AntDesign";
 import Emoji from 'react-native-emoji';
 import FloatingActionButton from "../FloatingActionButton";
-
 
 const window = Dimensions.get("window");
 
@@ -60,15 +59,16 @@ const styles = StyleSheet.create({
     marginEnd: 4,
   },
 
-  buttonClose: {
-    alignSelf: "flex-end",
-    marginVertical: 16,
-  },
-
   fab: {
     position: "absolute",
     bottom: 24,
     right: 24,
+  },
+
+
+  buttonClose: {
+    alignSelf: "flex-end",
+    marginVertical: 16,
   }
 
 
@@ -76,16 +76,17 @@ const styles = StyleSheet.create({
 
 export default function NewList({ navigation }) {
   const colors = useContext(ColorThemeContext).colors;
-
+  const currentList = useContext(DataContext).currentList;
+  const setCurrentList = useContext(DataContext).setCurrentList;
   const db = useContext(DataContext).db;
   const setLists = useContext(DataContext).setLists;
+ 
+  const notify = useContext(NotificationContext).notify;
+  const Status = useContext(NotificationContext).Status;
 
   const [showIconsPopup, setShowIconsPopup] = useState(false);
-  const [chosenIcon, setChosenIcon] = useState("memo");
-  const [chosenListName, setChosenListName] = useState("");
-
-  const setErrorMsg = useContext(NotificationContext).setMsg;
-  const showErrorMsg = useContext(NotificationContext).showMsg;
+  const [chosenIcon, setChosenIcon] = useState(currentList.icon);
+  const [chosenListName, setChosenListName] = useState(currentList.name);
 
   const containerStyle = [styles.container, {backgroundColor: colors.background}];
   const inputStyle= [styles.input, {backgroundColor: colors.background2, color: colors.text}];
@@ -94,39 +95,44 @@ export default function NewList({ navigation }) {
   const iconStyle = [styles.icon, {color: colors.icon}];
 
 
-  async function insertList() {
-
-    if(chosenListName === ""){
-
-      // error
-    }else if(chosenIcon === ""){
-
-      // errir
-    }else{
-
-        let insertedId;
-
-        try{
-
-          insertedId = await db.insertList(chosenListName, chosenIcon);
-
-        }catch(error){
-          console.error(error);
-        }
-
-
-        if(insertedId){
-          setLists((oldLists) => [
-            ...oldLists,
-            { name: name, icon: icon, id: insertedId, count: 0 },
-          ]);
-        }
-
-        navigation.goBack();
-
+  async function updateList(){
+    dismissKeyboard();
+    
+    if(chosenIcon === currentList.icon && chosenListName === currentList.name){
+        notify("No changes has been made", Status.INFO);
+        return;
     }
 
-  }
+    let updated;
+
+    try{
+
+      updated = await db.updateList({id: currentList.id, name: chosenListName, icon: chosenIcon})
+    }catch(error){
+      
+        notify("Failed to update list", Status.ERROR);
+         
+    }
+
+    if(updated){
+
+      setLists(oldLists => {
+
+        let idx = oldLists.indexOf(currentList);
+
+        oldLists[idx] = {id: currentList.id, name: chosenListName, icon: chosenIcon, count: currentList.count};
+
+        return oldLists;
+        
+      }
+    );
+
+    setCurrentList({id: currentList.id, name: chosenListName, icon: chosenIcon, count: currentList.count});
+
+    navigation.goBack();
+
+
+  }};
 
   function dismissKeyboard(){
     Keyboard.dismiss();
@@ -181,8 +187,9 @@ export default function NewList({ navigation }) {
         </TouchableOpacity>
 
       </View>
-
-      <FloatingActionButton icon="check" action={insertList} style={styles.fab}/>
+      
+      <FloatingActionButton icon="check" action={updateList} style={styles.fab}/>
+ 
     </Pressable>
   );
 }

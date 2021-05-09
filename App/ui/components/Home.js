@@ -1,20 +1,21 @@
-import React, {  useContext, useLayoutEffect, useEffect} from "react";
+import React, {  useContext, useEffect, useRef} from "react";
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
-  ImageBackground,
-  Dimensions,
-  StatusBar
+  StatusBar,
+  Dimensions
 } from "react-native";
+
+
 
 import {DataContext} from "../../contexts/Data";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
-import Icon from "react-native-vector-icons/AntDesign";
 
 import ListItem from "./ListItem";
+
+import FloatingActionButton from "./FloatingActionButton";
 
 import HomeHeader from "./HomeHeader";
 
@@ -24,54 +25,73 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    alignItems: "flex-end"
   },
   flatList: 
     {
-    marginVertical: 16,
-    marginStart: 8,
-    marginEnd: 8,
+    marginTop: 16,
+    alignSelf: "stretch"
   },
-  column: {
-    justifyContent: "space-between", 
-    marginBottom: 16
-  },
-  button: {
+  fab:{
     position: "absolute",
-    borderRadius: 50,
+    bottom:24,
     end: 24,
-    bottom:0,
-    marginBottom: 48,
-  },
-  icon: {
-    color: "#fff",
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-  },
+  }
 });
 
 
 export default function Home({navigation}) {
-
-  console.log("ASPECT RATIO ")
-  console.log(window.height / window.width);
-  console.log(18/9)
-
   const colors = useContext(ColorThemeContext).colors;
   const lists = useContext(DataContext).lists;
   const loading = useContext(DataContext).loading;
+  const setCurrentList = useContext(DataContext).setCurrentList;
+  const setTasks = useContext(DataContext).setTasks;
+  const scrollOffset = useContext(DataContext).scrollOffset;
+  const setScrollOffset = useContext(DataContext).setScrollOffset;
+  const flatListRef = useRef(null);
+  const containerStyle = [styles.container, {backgroundColor: colors.background}];
 
-  console.log(colors);
+  let scrollOffsetLocal = 0;
 
-  const containerStyle = [styles.container, {backgroundColor: colors.background}]
-  const iconStyle = [styles.icon, {color: colors.icon}];
-  const buttonStyle = [styles.button, {backgroundColor: colors.mainButton}];
+  useEffect(scrollToOffset);
+
+  function navigateToList(item){
+    console.log(scrollOffsetLocal)
+    setScrollOffset(scrollOffsetLocal);
+    setTasks([]);
+    setCurrentList(null);
+    setCurrentList(item);
+    navigation.navigate("List")
+  }
+
+  function showNewListModal(){
+    navigation.navigate("NewList");
+  }
+
 
   function renderItem({item}){
     return (
-      <ListItem item={item} onPress={() => {
-        navigation.navigate("List", {list: item});
-      }} />
+      <ListItem item={item} onPress={()=>{navigateToList(item)}} />
     )
+  }
+
+  function scrollToOffset(){
+    console.log(scrollOffset)
+
+  return navigation.addListener("focus", ()=>{
+
+    console.log("in focus");
+    console.log(scrollOffset); 
+    console.log(flatListRef.current)
+
+    if( flatListRef.current !== null && scrollOffset){
+      flatListRef.current.scrollToOffset(scrollOffset);
+    }
+   });
+  }
+
+  function onScroll(event){
+    scrollOffsetLocal = event.nativeEvent.contentOffset.y;
   }
 
   return (
@@ -82,24 +102,18 @@ export default function Home({navigation}) {
         <Text>Loading...</Text>
       ) : (
         <FlatList
+          ref={flatListRef}
           style={styles.flatList}
           data={lists}
+          onScroll={onScroll}
           renderItem={renderItem}
-          numColumns={2}
-          columnWrapperStyle={styles.column}
+          ItemSeparatorComponent={() => <View style={{backgroundColor: colors.background3, height: 0.8, width: window.width - 32, 
+          alignSelf: "center", marginVertical: 16}}></View>}
           keyExtractor={(item) => item.id.toString()}
         />
       )}
-      <TouchableOpacity
-        style={buttonStyle}
-        onPress={() => {
-          navigation.navigate("NewList");
-        }}
-      >
-        <Icon name="plus" size={32} style={iconStyle}></Icon>
-      </TouchableOpacity>
-   
+      
+      <FloatingActionButton action={showNewListModal} icon="plus" style={styles.fab}/>
     </View>
-  
   );
 }

@@ -7,11 +7,13 @@ import {
   Pressable,
   TouchableOpacity,
   StatusBar,
+
   ImageBackground,
   requireNativeComponent
 } from "react-native";
 import { DataContext } from "../../contexts/Data";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
+import {NotificationContext} from "../../contexts/Notification";
 import Icon from "react-native-vector-icons/AntDesign";
 import TaskItem from "./TaskItem";
 import ListHeader from "./ListHeader";
@@ -24,12 +26,19 @@ import { useLayoutEffect } from "react";
 
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-      resizeMode:"cover", 
-    },
+
 
     container: {flex: 1},
+
+    loadingView: {
+      flex: 1,
+      backgroundColor: "#121212"
+    },
+
+    flatList: {
+      flex: 1,
+      
+    },
 
   button: {
     position: "absolute",
@@ -48,24 +57,27 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     backgroundColor: "transparent"
-}
+},
 });
 
 
-export default function List({ navigation, route }) {
-const colors = useContext(ColorThemeContext).colors;
-const db = useContext(DataContext).db;
-const setTasks= useContext(DataContext).setTasks;
-const setLists = useContext(DataContext).setLists;
- 
-  const setListId = useContext(DataContext).setListId;
+export default function List({ navigation }) {
+  const colors = useContext(ColorThemeContext).colors;
+  const db = useContext(DataContext).db;
+  const setTasks= useContext(DataContext).setTasks;
+  const setLists = useContext(DataContext).setLists;
+  
+  const currentList = useContext(DataContext).currentList;
   const loading = useContext(DataContext).loading;
 
   const tasks = useContext(DataContext).tasks;
 
   const iconStyle = [styles.icon, {color: colors.icon}];
   const buttonStyle= [styles.button, {backgroundColor: colors.mainButton}];
-  const containerStyle = [styles.container, {backgroundColor: colors.background}]
+  const containerStyle = [styles.container, {backgroundColor: colors.background}];
+
+  const notify = useContext(NotificationContext).notify;
+  const Status = useContext(NotificationContext).Status;
 
 
   const deleteListItem = {icon: "delete", title: "Delete list", action: toggleShowConfirmationDialog};
@@ -82,7 +94,7 @@ const setLists = useContext(DataContext).setLists;
   }
 
   function openEditList(){
-    navigation.navigate("NewList", {list: route.params.list})
+    navigation.navigate("EditList");
   }
 
   function toggleShowConfirmationDialog(){ 
@@ -96,11 +108,10 @@ const setLists = useContext(DataContext).setLists;
     let deleted;
 
     try{
-       deleted = await db.deleteCompletedTasks();
+       deleted = await db.deleteCompletedTasks(currentList.id);
     }catch(error){
-        console.log(error);
+        notify("Failed to delete completed tasks", Status.ERROR);
     }
-
 
     if(deleted){
         let newTasks = tasks.filter(t => { return t.done === false || t.done === 0})
@@ -110,48 +121,11 @@ const setLists = useContext(DataContext).setLists;
 
   }
 
-  useLayoutEffect(()=>{
-    navigation.setOptions({ headerShown: false, headerStyle: {backgroundColor: "#0000"}, headerTitle: props => 
-    <ListHeaderTitle {...props} title={route.params.list.name} 
-    emoji={route.params.list.icon}/>});
-  }, [showMenu])
-
-
-
-  useEffect(() => {
-   
-     setListId(route.params.list.id);
-     return ()=>{
-       setListId(null);
-       setTasks([]);
-     }
-  }, []);
-
-
-  async function deleteTask(task){
- 
-    let deleted;
-
-    try{
-       deleted = await db.deleteTask(task.id);
-    }catch(error){
-
-        console.log(error);
-    }
-
-    if(deleted){
-        setTasks(oldTasks => {
-
-            return oldTasks.filter(t => { return t.id != task.id})
-        });
-    }
-  }
-
   async function deleteList(){
     let deleted;
 
     try{
-      deleted = await db.deleteList(route.params.list.id);
+      deleted = await db.deleteList(currentList.id);
     }catch(error){
       console.error(error);
     }
@@ -160,7 +134,7 @@ const setLists = useContext(DataContext).setLists;
       navigation.goBack();
       setLists(oldLists => {
 
-        let newLists = oldLists.filter(list => { return list.id !== route.params.list.id});
+        let newLists = oldLists.filter(list => { return list.id !== currentList.id});
 
         console.log(newLists);
 
@@ -185,7 +159,7 @@ const setLists = useContext(DataContext).setLists;
        
           }}
           onDelete={()=>{
-            deleteTask(item);
+         
         }}
         />
       );
@@ -194,25 +168,24 @@ const setLists = useContext(DataContext).setLists;
   return (
    
     <View style={containerStyle}>
-      {/* // <ImageBackground source={require("../../images/background_black_even.png")} style={styles.backgroundImage}> */}
       <StatusBar backgroundColor={colors.background}/>
-      <ListHeader name={route.params.list.name} emoji={route.params.list.icon} navigation={navigation}
+      <ListHeader navigation={navigation}
       actionRight={toggleShowMenu} />
 
-<View style={{flex: 1}}>
       {loading ? (
+        <View style={styles.loadingView}>
         <Text>Loading...</Text>
+        </View>
       ) : (
         <FlatList
-
+          style={styles.flatList}
           data={tasks}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString() }
         />
       )}
-      </View>
 
-      <NewTask list={route.params.list}/>
+      <NewTask list={currentList}/>
 
       {showMenu && 
         <Pressable onPress={toggleShowMenu} style={styles.overlay}>
@@ -223,7 +196,7 @@ const setLists = useContext(DataContext).setLists;
       <Pressable style={[styles.overlay, {zIndex: 4}]} onPress={toggleShowConfirmationDialog}>
         <ConfirmAction title="Do you want to delete this list?" message="The added items will also be deleted." actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
       </Pressable>}
-     {/* </ImageBackground> */}
+   
       </View>
  
   );

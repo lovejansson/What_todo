@@ -2,7 +2,6 @@ import React, {useContext} from "react";
 import {View, Text, StyleSheet, TouchableOpacity, Dimensions} from "react-native";
 import HeaderActionRight from "./HeaderActionRight";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
-import Icon from "react-native-vector-icons/Entypo";
 import Emoji from "react-native-emoji";
 
 const window = Dimensions.get("window");
@@ -11,12 +10,10 @@ const styles= StyleSheet.create({
 
     container: {
         width:window.width ,
-        height: 50,
+        height: 75,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        flex: 1,
-    
     },
 
     titleContainer:{
@@ -25,11 +22,11 @@ const styles= StyleSheet.create({
     },
 
     title: {
-       fontSize: 24,
-       fontWeight: "bold",
+       fontSize: 32,
+       
        marginStart: 16,
        marginEnd: 8,
-       fontFamily: "monospace"
+       fontFamily: "Lateef-Regular"
        
     },
     emoji: {

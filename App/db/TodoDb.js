@@ -182,14 +182,17 @@ export default class TodoDb {
       });
     }
 
-    deleteCompletedTasks(){ 
-      console.log("todoDb")
+    deleteCompletedTasks(listId){ 
+   
       return new Promise((resolve, reject) => {
+        if(!listId){
+          reject();
+        }
    
       this.db.transaction((tx) => {
         tx.executeSql(
-          `delete from tasks where done = ?`,
-          [1],
+          `delete from tasks where done = ? and listId = ?`,
+          [1, listId],
           (tx, resultSet) => {
             console.log(tx);
             resolve(resultSet.rowsAffected);

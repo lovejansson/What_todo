@@ -1,22 +1,7 @@
 import React, { useContext } from "react";
-import {StyleSheet, TouchableOpacity, FlatList, View} from "react-native";
+import {StyleSheet, FlatList, View} from "react-native";
 import MenuItem from "./MenuItem";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
-
-/*
-
-Delete list -> först popup som ska bekräfta att användaren är säker -> 
-sedan delete list + tasks och navigera tillbaka till listan av listor
-Edit list -> navigera till popup edit list 
-___________
-Delete completed tasks -> deletar nuvarande tasks listan för alla som är lediga
-
-By using navigation.setOptions inside the screen component, we get access to screen's props, state, context etc.
-
-
-menu object: [{title, icon, action}, ]
-
-*/ 
 
 const styles = StyleSheet.create({
 
@@ -42,7 +27,7 @@ export default function Menu({items}){
 
     const colors = useContext(ColorThemeContext).colors;
 
-    const containerStyle = [styles.container, {backgroundColor: colors.background2}];
+    const containerStyle = [styles.container, {backgroundColor: colors.background3}];
 
     function renderItem({item}){
         return(

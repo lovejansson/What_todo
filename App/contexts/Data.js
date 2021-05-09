@@ -6,13 +6,16 @@ import {openDatabase} from "react-native-sqlite-storage";
 export const DataContext = createContext();
 
 export const DataProvider = (props) => {
+
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
 
-  const [listId, setListId] = useState(null);
+  const [currentList, setCurrentList] = useState(null);
 
-let db = new TodoDb(openDatabase({name: "db.todo"}));
+  const [scrollOffset, setScrollOffset] = useState(null);
+
+  let db = new TodoDb(openDatabase({name: "db.todo"}));
 
 /*
 
@@ -52,11 +55,11 @@ useEffect(() => {
 
   useEffect(() => {
 
-    console.log("updated list id use effect")
+    console.log("useEffect currentList")
   
-    if (listId) {
+    if (currentList) {
       setLoading(true);
-      db.getTasksInList(listId)
+      db.getTasksInList(currentList.id)
         .then((res) => {
           setTasks(res);
           setLoading(false);
@@ -66,56 +69,16 @@ useEffect(() => {
           setLoading(false);
         });
     }
-  }, [listId]);
-
-
-
-  async function insertTask(list, description) {
-
-    if(description !== ""){
-      try{
-
-        var insertedId = await db.insertTask(list.id, description, null);
-
-      }catch(error){
-        console.error(error);
-      }
-  
-      if(insertedId){
-
-        // increase count in list
-
-        setLists(oldLists => {
-  
-          return oldLists.map(l =>{
-
-            l.count = l.id === list.id ? ++l.count : l.count;
-            return l;
-
-          });
-        });
-
-        // add to current tasks
-
-        setTasks((oldTasks) => [
-          ...oldTasks,
-          { description: description, id: insertedId, done: false, dueDate: null },
-        ]);
-
-      }else{
-  
-        console.error("New task not added");
-      }
-    } 
-  }
-
+  }, [currentList]);
 
 
   return (
     <DataContext.Provider
-      value={{ lists, setLists, db, loading, tasks, setTasks,  listId, setListId, insertTask}}
+      value={{ db, loading, lists, setLists, tasks, setTasks,
+         currentList, setCurrentList, scrollOffset, setScrollOffset}}
     >
       {props.children}
     </DataContext.Provider>
   );
+
 };

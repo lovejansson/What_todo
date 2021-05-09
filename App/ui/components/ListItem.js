@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useContext } from "react";
 
 import {
   Text,
@@ -11,25 +11,18 @@ import {
 
 import Emoji from 'react-native-emoji';
 
+import {ColorThemeContext} from "../../contexts/ColorTheme";
+
 
 
 const screen = Dimensions.get("window");
 
 const styles = StyleSheet.create({
-
-
-
   container: {
 
-    backgroundColor:"#fff",
-    width: screen.width / 2 - 16,
-  
-    borderBottomWidth: 4,
-    borderRightWidth: 4,
-    borderStyle: "solid",
-    borderColor:"#121212",
+    backgroundColor:"#121212",
     paddingVertical: 16,
-    paddingHorizontal:8,
+    paddingHorizontal:16,
     flexDirection: "row",
     alignItems: "center"
    
@@ -46,8 +39,8 @@ const styles = StyleSheet.create({
   },
 
   emoji:{
-    fontSize: 40,
-    marginEnd: 8,
+    fontSize: 48,
+    marginEnd: 24,
   },
 
   icon: {
@@ -58,19 +51,20 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function ListItem({ item, onPress, onDelete }) {
-  return (
-   
-    <ImageBackground source={require("../../images/background_black_row.png")}imageStyle={{resizeMode: "cover"}} 
-    style={{flex: 1}}>
- <Pressable style={styles.container} onPress={onPress}>
-   <Emoji style={styles.emoji} name={item.icon}/>
-   <View style={styles.info}>
-   <Text style={styles.name}>{item.name}</Text>
-   <Text style={styles.count}>{item.count} Tasks</Text>
-   </View>
-  </Pressable>
-  </ImageBackground>
+export default function ListItem({ item, onPress }) {
+  const colors = useContext(ColorThemeContext).colors;
 
+  const nameStyle = [styles.name, {color: colors.text}];
+  const countStyle = [styles.count, {color: colors.text2}];
+
+  return (
+      <Pressable style={styles.container} onPress={onPress}>
+        <Emoji style={styles.emoji} name={item.icon}/>
+
+        <View style={styles.info}>
+          <Text style={nameStyle}>{item.name}</Text>
+          <Text style={countStyle}>{item.count} Tasks</Text>
+        </View>
+      </Pressable>
   );
 }

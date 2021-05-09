@@ -4,6 +4,7 @@ import Emoji from "react-native-emoji";
 import Icon from "react-native-vector-icons/AntDesign";
 import HeaderActionRight from "./HeaderActionRight";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
+import { DataContext } from "../../contexts/Data";
 
 const styles= StyleSheet.create({
 
@@ -39,14 +40,15 @@ const styles= StyleSheet.create({
     }
 });
 
-export default function ListHeader(props){
+export default function ListHeader({navigation, actionRight}){
 
     const colors = useContext(ColorThemeContext).colors;
+    const currentList = useContext(DataContext).currentList;
 
     const containerStyle = [styles.container, {backgroundColor: colors.background}];
 
     function navigateBack(){
-        props.navigation.goBack();
+        navigation.goBack();
     }
 
     return(
@@ -57,11 +59,11 @@ export default function ListHeader(props){
             </TouchableOpacity>
 
             <View style={styles.headerTitle}>
-                <Emoji name={props.emoji} style={styles.emoji}/>
-                <Text style={styles.name}>{props.name}</Text>
+                <Emoji name={currentList.icon} style={styles.emoji}/>
+                <Text style={styles.name}>{currentList.name}</Text>
             </View>
 
-            <HeaderActionRight onPress={props.actionRight}/>
+            <HeaderActionRight onPress={actionRight}/>
         </View>
     )
 }
