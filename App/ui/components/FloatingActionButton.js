@@ -35,7 +35,7 @@ export default function FloatingActionButton({action, icon, style}){
 
   const buttonStyle = [styles.button, {backgroundColor: colors.mainButton}, animatedTrans];
   const buttonContainerstyle  = [{backgroundColor: colors.mainButtonShadow}, style];
-  const iconStyle = {color: colors.icon};
+  const iconStyle = {color: colors.mainButtonIcon};
 
 
     function onPress(){

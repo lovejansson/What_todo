@@ -15,31 +15,35 @@ const styles= StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
     },
+
     headerTitle: {
         flexDirection:"row",
         alignItems: "center",
-        justifyContent: "center",
-        flex: 1,      
+        flex: 1,
+        marginStart: 24,
     },
+
     emoji: {
         fontSize: 28,
+        marginEnd: 8,
     },
+
     name:{
-        fontSize: 32,
+        fontSize: 20,
         color: "#fff",
-        fontFamily: "Lateef-Regular",
-        marginEnd: 8
+        fontWeight: "bold"
     },
+
     icon: {
         color: "#fff",
         marginStart: 16,   
     }
 });
 
-export default function ListHeader({navigation, actionRight}){
+export default function SettingsHeader({navigation}){
 
     const colors = useContext(ColorThemeContext).colors;
-    const currentList = useContext(DataContext).currentList;
+  
 
     const containerStyle = [styles.container, {backgroundColor: colors.background}];
     const iconStyle = [styles.icon, {color: colors.icon}];
@@ -51,14 +55,15 @@ export default function ListHeader({navigation, actionRight}){
 
     return(
         <View style={containerStyle}> 
+
             <TouchableOpacity onPress={navigateBack}> 
                 <Icon style={iconStyle} name="arrowleft" size={28} />
             </TouchableOpacity>
+
             <View style={styles.headerTitle}>
-                <Text style={nameStyle}>{currentList.name}</Text>
-                <Emoji name={currentList.icon} style={styles.emoji}/>
+                <Emoji name="gear" style={styles.emoji}/>
+                <Text style={nameStyle}>Settings</Text>
             </View>
-            <HeaderActionRight onPress={actionRight}/>
         </View>
     )
 }

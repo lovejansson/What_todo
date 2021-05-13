@@ -1,7 +1,7 @@
 import React, { useState, createContext, useEffect, useContext } from "react";
 import {StyleSheet, Text, Dimensions} from "react-native";
 import Animated, {useSharedValue, useAnimatedStyle,
-     withTiming,  runOnJS, withDelay} from "react-native-reanimated";
+     withTiming} from "react-native-reanimated";
 import { ColorThemeContext } from "./ColorTheme";
 
 export const NotificationContext = createContext();
@@ -52,7 +52,7 @@ export const NotificationProvider = ({children}) => {
 
 
 const [containerStyle, setContainerStyle] = useState([styles.container, animatedOpacity]);
-let msgStyle = [styles.msg, {color: colors.text}];
+let [msgStyle, setMsgStyle] = useState([styles.msg]);
   
   const [msg, setMsg] = useState("");
 
@@ -72,13 +72,15 @@ let msgStyle = [styles.msg, {color: colors.text}];
 
         case Status.ERROR:
        
-            setContainerStyle([styles.container, animatedOpacity, {backgroundColor: colors.error} ])
+            setContainerStyle([styles.container, animatedOpacity, {backgroundColor: colors.error} ]);
+            setMsgStyle([styles.msg, {color: "#fff"}]);
           
             break;
 
         case Status.INFO:
          
-            setContainerStyle([styles.container, animatedOpacity, {backgroundColor: colors.background3} ])
+            setContainerStyle([styles.container, animatedOpacity, {backgroundColor: colors.background3} ]);
+            setMsgStyle([styles.msg, {color: colors.text}]);
            
             break;
       }

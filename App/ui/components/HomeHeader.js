@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {View, Text, StyleSheet, TouchableOpacity, Dimensions} from "react-native";
+import {View, Text, StyleSheet, Dimensions} from "react-native";
 import HeaderActionRight from "./HeaderActionRight";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 import Emoji from "react-native-emoji";
@@ -19,33 +19,28 @@ const styles= StyleSheet.create({
     titleContainer:{
         flexDirection: "row",
         alignItems: "center",
+        marginStart: 4,
+      
     },
 
     title: {
        fontSize: 32,
-       
        marginStart: 16,
        marginEnd: 8,
        fontFamily: "Lateef-Regular"
        
     },
     emoji: {
-
         fontSize: 24,
-
     },
 });
 
 export default function ListHeader(props){
     const colors = useContext(ColorThemeContext).colors;
-    
     const titleStyle = [styles.title, {color: colors.heading}]
-
 
     return(
         <View style={styles.container}> 
- 
-
             <View style={styles.titleContainer}>
             <Text style={titleStyle}>What todo</Text>
                    <Emoji name="shrug" style={styles.emoji}/>

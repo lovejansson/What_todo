@@ -9,13 +9,13 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: window.height / 3,
         left: window.width / 2,
-        width: 240,
+        width: window.width - 32,
         transform: [{translateX: -120}],
         paddingVertical: 16,
         paddingHorizontal: 24,
-       
-        borderColor: "#000",
         borderStyle: "solid",
+        borderTopWidth: 0.2,
+        borderStartWidth: 0.2,
         borderBottomWidth: 2,
         borderEndWidth: 2,
     },
@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
 export default function ConfirmationDialog({title, message, actionOk, actionCancel}){
     const colors = useContext(ColorThemeContext).colors;
     const titleStyle = [styles.title, {color: colors.heading}];
-    const messageStyle = [styles.message, {color: colors.text}];
-    const buttonStyle = [styles.button, {color: colors.buttonText}];
-    const containerStyle = [styles.container, {backgroundColor: colors.background2}];
+    const messageStyle = [styles.message, {color: colors.text2}];
+    const buttonStyle = [styles.button, {color: colors.text}];
+    const containerStyle = [styles.container, {backgroundColor: colors.backgroundMenu, borderColor: colors.borderMenu}];
 
     return(
         <View style={containerStyle}>

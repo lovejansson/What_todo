@@ -51,62 +51,14 @@ export default function EditTask(props) {
 
   }
 
-  async function deleteTask(task){
- 
-    let deleted;
-
-    try{
-       deleted = await db.deleteTask(task.id);
-    }catch(error){
-
-        console.log(error);
-    }
-
-    if(deleted){
-        setTasks(oldTasks => {
-
-            return oldTasks.filter(t => { return t.id != task.id})
-        });
-    }
-  }
-
   function dismissKeyboard(){
     Keyboard.dismiss();
   }
 
   return (
       <View style={styles.container}>
-      <TouchableOpacity
-      style={buttonDeleteStyle}
-        onPress={deleteTask}>
-        <Icon style={iconStyle} name="delete" size={32}></Icon>
-      </TouchableOpacity>
-      <View>
-      <CheckBox  tintColors={checkBoxColors} style={styles.checkbox} value={taskDone} 
-                onValueChange={updateTaskDone}/>
-        <TextInput
-          style={inputStyle}
-          value = {chosenListName}
-          placeholder="Name"
-          placeholderTextColor={colors.text}
-          selectionColor={colors.text}
-          keyboardType="ascii-capable"
-          onChangeText={(value) => {
-            setChosenListName(value);
-          }}
-        />
-        </View>
-        <TouchableOpacity
-        style={buttonStyleSave}
-        onPress={saveTask}>
-        <Icon
-          style={iconStyle}
-          name="check"
-          size={32}
-          color="black"
-        />
-      </TouchableOpacity>
         
+
     </View>
   );
 }

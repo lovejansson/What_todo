@@ -1,7 +1,9 @@
-import React from "react";
+import React, {useContext} from "react";
 import Icon from "react-native-vector-icons/AntDesign";
 
 import {StyleSheet, TouchableOpacity, Text} from "react-native";
+
+import {ColorThemeContext} from "../../contexts/ColorTheme";
 
 /*
 
@@ -18,16 +20,15 @@ const styles = StyleSheet.create({
     container: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 8,
+      paddingVertical: 12,
       paddingHorizontal: 16,
     },
     icon:{
       marginEnd: 16,
-      color: "#fff"
     },
     text: {
-      fontSize: 20,
-      color: "#fff"
+      fontSize: 18,
+      fontFamily: "Mukta-Regular",
     }
   });
 
@@ -36,10 +37,13 @@ const styles = StyleSheet.create({
  * {icon: AntDesign 'name' attribute, title: description of item, action: Function to execute when selected }
  */
 export default function MenuItem({content}){
+  const colors = useContext(ColorThemeContext).colors;
+  const iconStyle = [styles.icon, {color: colors.icon}];
+  const textStyle = [styles.text, {color: colors.text}];
 
     return (
         <TouchableOpacity style={styles.container} onPress={content.action}>
-          <Icon name={content.icon} size={20} style={styles.icon} />
-          <Text style={styles.text}>{content.title}</Text>
+          <Icon name={content.icon} size={20} style={iconStyle} />
+          <Text style={textStyle}>{content.title}</Text>
           </TouchableOpacity>)
 }

@@ -119,7 +119,7 @@ export default class TodoDb {
       });
     }
   
-    updateTask(id, description) {
+    updateTaskDescription(id, description) {
       return new Promise((resolve, reject) => {
         if (!id || !description) {
           reject("missing params");

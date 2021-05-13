@@ -9,10 +9,11 @@ const styles = StyleSheet.create({
         position: "absolute",
         right: 4,
         top: 4,
-        borderColor: "#000",
         borderStyle: "solid",
         borderBottomWidth: 2,
-        borderEndWidth: 2,
+        borderEndWidth: 3,
+        borderTopWidth: 0.5,
+        borderStartWidth: 0.5,
     
     }
   });
@@ -27,7 +28,8 @@ export default function Menu({items}){
 
     const colors = useContext(ColorThemeContext).colors;
 
-    const containerStyle = [styles.container, {backgroundColor: colors.background3}];
+    const containerStyle = [styles.container, {backgroundColor: colors.backgroundMenu, borderColor: colors.borderMenu}];
+    
 
     function renderItem({item}){
         return(

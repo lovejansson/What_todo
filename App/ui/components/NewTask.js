@@ -11,7 +11,7 @@ import { DataContext } from "../../contexts/Data";
 
 import { ColorThemeContext } from "../../contexts/ColorTheme";
 
-import {NotificationContext } from "../../contexts/Notification";
+import { NotificationContext } from "../../contexts/Notification";
 
 import FloatingActionButton from "./FloatingActionButton";
 
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 18,
     flex: 1,
-    padding: 16,
+    padding: 12,
   
     marginEnd: 32,
     borderBottomWidth: 0.75,
@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
 
 
 export default function NewTask() {
+
 
   const colors = useContext(ColorThemeContext).colors;
   const notify = useContext(NotificationContext).notify;
@@ -52,6 +53,7 @@ export default function NewTask() {
   const inputStyle= [styles.input, {backgroundColor: colors.background, color: colors.text, borderColor: colors.text2}];
 
   const [description, setDescription] = useState("");
+  const [btnIcon, setBtnIcon] = useState("plus");
 
   async function onSave() {
     dismissKeyboard();
@@ -75,6 +77,8 @@ export default function NewTask() {
         }
     
         if(insertedId){
+
+          console.log("inserted id")
   
           // increase count in list
   
@@ -120,11 +124,16 @@ export default function NewTask() {
           multiline={true}
           value={description}
           onChangeText={(value) => {
+            if(value && value.length > 0){
+              setBtnIcon("check");
+            }else{
+              setBtnIcon("plus")
+            }
             setDescription(value);
           }}
         />
 
-        <FloatingActionButton action={onSave} icon="check"/>
+        <FloatingActionButton action={onSave} icon={btnIcon}/>
 
       </View>
   );

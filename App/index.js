@@ -1,47 +1,20 @@
 
 import React from "react";
+import TodoDb from "./db/TodoDb";
+import {openDatabase} from "react-native-sqlite-storage";
 import {ColorThemeProvider} from "./contexts/ColorTheme";
 import {DataProvider} from "./contexts/Data";
 import { NotificationProvider} from "./contexts/Notification";
-import { NavigationContainer, DarkTheme } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import NewList from "./ui/components/popups/NewList.js";
-import EditList from "./ui/components/popups/EditList.js";
-
-import Main from "./ui/screens/Main";
-
-const Stack = createStackNavigator();
+import Navigation from "./ui/screens/Navigation";
 
 export default function App() {
+  const db = new TodoDb(openDatabase({name: "db.todo",createFromLocation: 1}));
   return (
-    <DataProvider >
+    <DataProvider db={db} >
       <ColorThemeProvider>
       <NotificationProvider >
-     
-      <NavigationContainer theme={DarkTheme} >
-      
-      <Stack.Navigator >
-          <Stack.Screen 
     
-            name="Main"
-            component={Main}
-            options={{ headerShown: false }}
-          />
-
-          <Stack.Screen
-            
-            name="NewList"
-            component={NewList}
-            options={{ headerShown: false }}
-          />
-        <Stack.Screen
-            name="EditList"
-            component={EditList}
-            options={{ headerShown: false }}
-          />
-            
-        </Stack.Navigator>
-      </NavigationContainer>
+        <Navigation/>
    
       </NotificationProvider>
 

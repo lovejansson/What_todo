@@ -5,23 +5,19 @@ import {
   FlatList,
   StyleSheet,
   Pressable,
-  TouchableOpacity,
   StatusBar,
-
-  ImageBackground,
-  requireNativeComponent
+  Keyboard,
 } from "react-native";
 import { DataContext } from "../../contexts/Data";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 import {NotificationContext} from "../../contexts/Notification";
-import Icon from "react-native-vector-icons/AntDesign";
+
 import TaskItem from "./TaskItem";
 import ListHeader from "./ListHeader";
-import HeaderActionRight from "./HeaderActionRight";
 import NewTask from "./NewTask.js";
 import Menu from "./Menu";
 import ConfirmAction from "./popups/ConfirmAction";
-import { useLayoutEffect } from "react";
+import EmptyData from "./EmptyData";
 
 
 
@@ -32,7 +28,6 @@ const styles = StyleSheet.create({
 
     loadingView: {
       flex: 1,
-      backgroundColor: "#121212"
     },
 
     flatList: {
@@ -63,6 +58,7 @@ const styles = StyleSheet.create({
 
 export default function List({ navigation }) {
   const colors = useContext(ColorThemeContext).colors;
+  const theme = useContext(ColorThemeContext).theme;
   const db = useContext(DataContext).db;
   const setTasks= useContext(DataContext).setTasks;
   const setLists = useContext(DataContext).setLists;
@@ -72,9 +68,8 @@ export default function List({ navigation }) {
 
   const tasks = useContext(DataContext).tasks;
 
-  const iconStyle = [styles.icon, {color: colors.icon}];
-  const buttonStyle= [styles.button, {backgroundColor: colors.mainButton}];
   const containerStyle = [styles.container, {backgroundColor: colors.background}];
+  
 
   const notify = useContext(NotificationContext).notify;
   const Status = useContext(NotificationContext).Status;
@@ -88,6 +83,44 @@ export default function List({ navigation }) {
 
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirmActionDialog, setShowConfirmationDialog] = useState(false);
+
+  const [emptyList, setEmptyList] = useState(false);
+
+  let keyBoardShows = false;
+
+
+  useEffect(()=>{
+    if(tasks){
+
+      if(tasks.length > 0){
+        setEmptyList(false);
+
+      }else{
+        setEmptyList(true);
+      }
+    }
+  }, [tasks]);
+
+  useEffect(()=>{
+
+    const keyBoardHideHandler = () => {
+      keyBoardShows = false;
+
+    };
+
+    const keyBoardShowHandler = () => {
+      keyBoardShows = true;
+    }
+
+    Keyboard.addListener("keyboardDidShow", keyBoardShowHandler);
+    Keyboard.addListener("keyboardDidHide", keyBoardHideHandler);
+
+    return(()=>{
+
+      Keyboard.removeAllListeners();
+    });
+
+  })
 
   function toggleShowMenu(){
       setShowMenu(!showMenu);
@@ -144,49 +177,52 @@ export default function List({ navigation }) {
     }
   }
 
+  const [editMode, setEditMode] = useState(false);
+
+  function toggleEditMode(value){
+
+    if(value === false && keyBoardShows){
+        Keyboard.addListener("keyboardDidHide", () =>{
+      
+          setEditMode(value);
+      
+        });
+
+    }else{
+      setEditMode(value);
+    }
+
+
+  }
+
+
   function renderItem({item}){
-    return (
-        <TaskItem
-          item={item}
-          onUpdateDone={(newValue)=> {
-            let idx = tasks.indexOf(item);
-            setTasks(oldTasks => {
-              oldTasks[idx].done = newValue;
-              return oldTasks;
-            })  
-          }}
-          onPress={() => {
-       
-          }}
-          onDelete={()=>{
-         
-        }}
-        />
-      );
+   
+      return <TaskItem task={item} editMode={editMode} toggleEditMode={toggleEditMode}/>
   }
 
   return (
    
     <View style={containerStyle}>
-      <StatusBar backgroundColor={colors.background}/>
+        <StatusBar backgroundColor={colors.background}  barStyle={theme === "white" ? "dark-content" : "light-content"}/>
       <ListHeader navigation={navigation}
       actionRight={toggleShowMenu} />
 
-      {loading ? (
-        <View style={styles.loadingView}>
-        <Text>Loading...</Text>
-        </View>
+      { emptyList ? (
+        <EmptyData info="Empty list"/>
+     
       ) : (
         <FlatList
           style={styles.flatList}
           data={tasks}
+          keyboardShouldPersistTaps="always"
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString() }
         />
       )}
 
-      <NewTask list={currentList}/>
-
+      {!editMode &&   <NewTask list={currentList}/>}
+    
       {showMenu && 
         <Pressable onPress={toggleShowMenu} style={styles.overlay}>
           <Menu items={menuItems}/>

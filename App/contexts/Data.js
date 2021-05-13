@@ -9,36 +9,21 @@ export const DataProvider = (props) => {
 
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(null);
 
   const [currentList, setCurrentList] = useState(null);
 
   const [scrollOffset, setScrollOffset] = useState(null);
 
-  let db = new TodoDb(openDatabase({name: "db.todo"}));
+  let db = props.db;
 
-/*
+  console.log(db)
 
-  hemsidan -> listor namn/antal entries/antal utförda saker
-
-  Lista sidan -> alla saker 
-
-  ny lista -> måste lägga till en lista i lists
-
-  ny task -> måste lägga till en task i en lista
-
-  edit task -> måste uppdatera task inom en lista
-
-  edit list -> måste uppdatera en lista i lists
-
-
-*/
 
 useEffect(() => {
     setLoading(true);
     db.createListsTable().then(() => {
       db.createTasksTable().then(()=> {
-        console.log("created tasks table")
             db.getLists()
             .then((res) => {
               setLists(res);
@@ -54,9 +39,6 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-
-    console.log("useEffect currentList")
-  
     if (currentList) {
       setLoading(true);
       db.getTasksInList(currentList.id)
@@ -75,8 +57,7 @@ useEffect(() => {
   return (
     <DataContext.Provider
       value={{ db, loading, lists, setLists, tasks, setTasks,
-         currentList, setCurrentList, scrollOffset, setScrollOffset}}
-    >
+         currentList, setCurrentList, scrollOffset, setScrollOffset}}>
       {props.children}
     </DataContext.Provider>
   );
