@@ -137,6 +137,7 @@ export default function Home({navigation}) {
         <FlatList
           ref={flatListRef}
           style={styles.flatList}
+
           data={lists}
           onScroll={onScroll}
           renderItem={renderItem}

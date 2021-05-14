@@ -6,7 +6,8 @@ import {
   Dimensions,
   View,
   ImageBackground,
-  TextInput
+  TextInput,
+  TouchableHighlight
 } from "react-native";
 import CheckBox from '@react-native-community/checkbox';
 
@@ -39,7 +40,13 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 18,
     width: screen.width * 0.75,
+  
     fontFamily: "Mukta-Regular",
+  },
+  list: {
+backgroundColor: "red",
+height: "100%",
+justifyContent: "center"
   },
   
   actionRight:{
@@ -231,17 +238,20 @@ export default function TaskDetails({ task, openEditMode})
 
 
     const gestureHandler = useAnimatedGestureHandler({
-        onStart: (event, ctx) => {         
+        onStart: (event, ctx) => {   
+          console.log("start pan")      
           },
           onActive: (event, ctx) => {
           
-          
+          console.log("active pan")
            if(event.translationX < 0){
             transX.value = event.translationX;
          
            }
           },
           onEnd: (event, ctx) => {
+
+            console.log("end pan")
           
             if(event.translationX < (screen.width * -0.6)){
                     transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
@@ -263,21 +273,21 @@ export default function TaskDetails({ task, openEditMode})
 
   return (
     <Animated.View style={[styles.container, animatedHeight]}>
-      <PanGestureHandler activeOffsetX={[-20, 100000]} onGestureEvent={gestureHandler} >
+     {/* // <PanGestureHandler activeOffsetX={[-20, 100000]} onGestureEvent={gestureHandler} > */}
         <Animated.View style={[animatedTransX, {zIndex: 1}]} >
 
           <View style={contentStyle} >
             <CheckBox  tintColors={checkBoxColors} style={styles.checkbox} value={taskDone} 
                 onValueChange={updateDone}/>
                 
-            <Pressable
+            <TouchableHighlight
               style={styles.list}
               onPress={openEditMode}>
                <Text style={descriptionStyle} numberOfLines={3} ellipsizeMode="tail" >{task.description}</Text>  
-            </Pressable>
+            </TouchableHighlight>
           </View>
         </Animated.View>
-      </PanGestureHandler>
+      {/* </PanGestureHandler> */}
     
       <ImageBackground source={theme === "black" ? require("../../images/background_dark_row.png") : require("../../images/background_light_row.png")} imageStyle={{resizeMode: "cover"}} style={actionRightStyle} >
       <Animated.View style={[animatedOpacity]}>

@@ -93,16 +93,16 @@ export default function TaskEdit({task, closeEditMode}){
 
    const [newDescription, setNewDescription] = useState(task.description);
 
-   useEffect(()=>{
+  //  useEffect(()=>{
 
-    const keyBoardHideHandler = ()=>{
-      closeEditMode();
-    };
+  //   const keyBoardHideHandler = ()=>{
+  //     closeEditMode();
+  //   };
 
-    Keyboard.addListener("keyboardDidHide", keyBoardHideHandler );
+  //   Keyboard.addListener("keyboardDidHide", keyBoardHideHandler );
 
-    return(()=>{Keyboard.removeListener("keyboardDidHide", keyBoardHideHandler)}); 
-   },[])
+  //   return(()=>{Keyboard.removeListener("keyboardDidHide", keyBoardHideHandler)}); 
+  //  },[])
  
    async function updateDescription(){
 

@@ -30,11 +30,6 @@ const styles = StyleSheet.create({
       flex: 1,
     },
 
-    flatList: {
-      flex: 1,
-      
-    },
-
   button: {
     position: "absolute",
     borderRadius: 50,
@@ -83,10 +78,11 @@ export default function List({ navigation }) {
 
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirmActionDialog, setShowConfirmationDialog] = useState(false);
+  const [flatListStyle, setFlatListStyle] = useState(styles.flatList);
 
   const [emptyList, setEmptyList] = useState(false);
 
-  let keyBoardShows = false;
+  let keyboardShows = false;
 
 
   useEffect(()=>{
@@ -103,21 +99,24 @@ export default function List({ navigation }) {
 
   useEffect(()=>{
 
-    const keyBoardHideHandler = () => {
-      keyBoardShows = false;
+    const keyboardHideHandler = () => {
+      keyboardShows = false;
+      // setFlatListStyle(styles.flatList);
 
     };
 
-    const keyBoardShowHandler = () => {
-      keyBoardShows = true;
+    const keyboardShowHandler = () => {
+      keyboardShows = true;
+    //  setFlatListStyle([styles.flatList, {marginBottom: 75}])
     }
 
-    Keyboard.addListener("keyboardDidShow", keyBoardShowHandler);
-    Keyboard.addListener("keyboardDidHide", keyBoardHideHandler);
+    Keyboard.addListener("keyboardDidShow", keyboardShowHandler);
+    Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
     return(()=>{
 
-      Keyboard.removeAllListeners();
+      Keyboard.removeListener("keyBoardDidShow", keyboardShowHandler);
+      Keyboard.removeListener("keyBoardDidHide", keyboardHideHandler);
     });
 
   })
@@ -181,9 +180,15 @@ export default function List({ navigation }) {
 
   function toggleEditMode(value){
 
-    if(value === false && keyBoardShows){
-        Keyboard.addListener("keyboardDidHide", () =>{
-      
+    console.log(value)
+    console.log(keyboardShows);
+
+    if(value === false && keyboardShows){
+      console.log("value false and keyboard shows")
+        Keyboard.dismiss();
+        Keyboard.addListener("keyboardDidHide", () => {
+          
+          console.log("keyboard handler")
           setEditMode(value);
       
         });
@@ -213,15 +218,17 @@ export default function List({ navigation }) {
      
       ) : (
         <FlatList
-          style={styles.flatList}
+          style={flatListStyle}
           data={tasks}
-          keyboardShouldPersistTaps="always"
+          ListFooterComponent={<View></View>}
+          ListFooterComponentStyle={{width: window.width, height: 30}}
+          keyboardShouldPersistTaps="handled"
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString() }
         />
       )}
 
-      {!editMode &&   <NewTask list={currentList}/>}
+      {!editMode && <NewTask list={currentList}/>}
     
       {showMenu && 
         <Pressable onPress={toggleShowMenu} style={styles.overlay}>

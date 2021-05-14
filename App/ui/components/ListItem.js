@@ -6,21 +6,25 @@ import {
   Pressable,
   View,
   Dimensions,
-  ImageBackground
+  ImageBackground,
+  TouchableHighlight,
+  TouchableOpacity
 } from "react-native";
 
 import Emoji from 'react-native-emoji';
 
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 
-const screen = Dimensions.get("window");
+const window = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 16,
     paddingHorizontal:16,
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "stretch",
+
+    
    
   },
   name: {
@@ -50,18 +54,18 @@ const styles = StyleSheet.create({
 export default function ListItem({ item, onPress }) {
   const colors = useContext(ColorThemeContext).colors;
 
-  const containerStyle = [styles.container, {backgroundColor: colors.background}];
+  const containerStyle = [styles.container, {backgroundColor: "red"}];
   const nameStyle = [styles.name, {color: colors.text}];
   const countStyle = [styles.count, {color: colors.text2}];
 
   return (
-      <Pressable style={containerStyle} onPress={onPress}>
+      <TouchableOpacity style={containerStyle} onPress={onPress}>
         <Emoji style={styles.emoji} name={item.icon}/>
 
         <View style={styles.info}>
           <Text style={nameStyle}>{item.name}</Text>
           <Text style={countStyle}>{item.count} Things</Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
   );
 }

@@ -11,16 +11,18 @@ export default function TaskItem({task, editMode, toggleEditMode}){
 
    useEffect(()=>{
        if(!editMode){
-           
+           setEditModeLocal(false);  
        }
 
    }, [editMode])
 
 
    function openEditMode(){
+       console.log("openEditMode")
        if(editMode){
 
         Keyboard.dismiss();
+        toggleEditMode(false);
 
        }else{
         setEditModeLocal(true);
