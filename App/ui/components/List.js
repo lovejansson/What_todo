@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import {
   View,
-  Text,
   FlatList,
   StyleSheet,
   Pressable,
   StatusBar,
   Keyboard,
+  Dimensions,
 } from "react-native";
 import { DataContext } from "../../contexts/Data";
-import {ColorThemeContext} from "../../contexts/ColorTheme";
-import {NotificationContext} from "../../contexts/Notification";
+import { ColorThemeContext } from "../../contexts/ColorTheme";
+import { NotificationContext } from "../../contexts/Notification";
+
 
 import TaskItem from "./TaskItem";
 import ListHeader from "./ListHeader";
@@ -18,17 +19,18 @@ import NewTask from "./NewTask.js";
 import Menu from "./Menu";
 import ConfirmAction from "./popups/ConfirmAction";
 import EmptyData from "./EmptyData";
+import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue} from "react-native-reanimated";
+import { PanGestureHandler } from "react-native-gesture-handler";
+import { transformSync } from "@babel/core";
 
 
+const window = Dimensions.get("window");
 
 const styles = StyleSheet.create({
 
 
-    container: {flex: 1},
+    container: {height: "100%", paddingBottom: 16,},
 
-    loadingView: {
-      flex: 1,
-    },
 
   button: {
     position: "absolute",
@@ -57,6 +59,7 @@ export default function List({ navigation }) {
   const db = useContext(DataContext).db;
   const setTasks= useContext(DataContext).setTasks;
   const setLists = useContext(DataContext).setLists;
+
   
   const currentList = useContext(DataContext).currentList;
   const loading = useContext(DataContext).loading;
@@ -82,7 +85,26 @@ export default function List({ navigation }) {
 
   const [emptyList, setEmptyList] = useState(false);
 
-  let keyboardShows = false;
+  const [keyboardShows, setKeyboardShows] = useState(false);
+
+  const posY = useSharedValue(0);
+  const transY = useSharedValue(0);
+
+  const animatedPosition = useAnimatedStyle(()=>{
+    return({
+
+      top: posY.value,
+      left: 0,
+
+    })
+  })
+
+  const animatedTransY = useAnimatedStyle(()=> {
+
+    return({
+      transform: [{translateY: transY.value}]
+    })
+  })
 
 
   useEffect(()=>{
@@ -100,26 +122,19 @@ export default function List({ navigation }) {
   useEffect(()=>{
 
     const keyboardHideHandler = () => {
-      keyboardShows = false;
-      // setFlatListStyle(styles.flatList);
-
-    };
-
-    const keyboardShowHandler = () => {
-      keyboardShows = true;
-    //  setFlatListStyle([styles.flatList, {marginBottom: 75}])
-    }
-
+      console.log("keyboard shows false list")
+      
+      setKeyboardShows(false)};
+    const keyboardShowHandler = () => setKeyboardShows(true);
     Keyboard.addListener("keyboardDidShow", keyboardShowHandler);
     Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
     return(()=>{
-
-      Keyboard.removeListener("keyBoardDidShow", keyboardShowHandler);
-      Keyboard.removeListener("keyBoardDidHide", keyboardHideHandler);
+      Keyboard.removeAllListeners("keyBoardDidShow");
+      Keyboard.removeAllListeners("keyBoardDidHide");
     });
 
-  })
+  }, []);
 
   function toggleShowMenu(){
       setShowMenu(!showMenu);
@@ -130,6 +145,7 @@ export default function List({ navigation }) {
   }
 
   function toggleShowConfirmationDialog(){ 
+    setShowMenu(false)
     setShowConfirmationDialog(!showConfirmActionDialog);
   }
 
@@ -178,35 +194,68 @@ export default function List({ navigation }) {
 
   const [editMode, setEditMode] = useState(false);
 
-  function toggleEditMode(value){
+  function toggleEditMode(){
 
-    console.log(value)
-    console.log(keyboardShows);
+    
 
-    if(value === false && keyboardShows){
-      console.log("value false and keyboard shows")
+    if(editMode && keyboardShows){
+
+      console.log("keyboardshows and editmode")
+    console.log(editMode);
+    console.log(keyboardShows)
         Keyboard.dismiss();
-        Keyboard.addListener("keyboardDidHide", () => {
-          
-          console.log("keyboard handler")
-          setEditMode(value);
-      
-        });
+
+        // waiting to change edit mode so that NewTask is displayed after keyboard is hidden
+        const keyboardHideHandler = () => {
+          setEditMode(!editMode);
+          Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
+        }
+        Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
     }else{
-      setEditMode(value);
+      console.log("HEj")
+      setEditMode(!editMode);
     }
-
-
   }
 
+  function activateDrag(index){
+    console.log("activate drag");
+    posY.value = index * 90;
+    transY.value = 0;
 
-  function renderItem({item}){
    
-      return <TaskItem task={item} editMode={editMode} toggleEditMode={toggleEditMode}/>
+    /// synlighet för drag elementet precis ovanför det element som ska draggas?
+    // aktivera, positionera,
   }
+
+  function renderItem({item, index}){
+   
+      return <TaskItem task={item} index={index} listEditMode={editMode} toggleEditMode={toggleEditMode} activateDrag={activateDrag}/>
+  }
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (event, ctx) => {   
+      console.log("start pan")      
+      },
+      onActive: (event, ctx) => {
+     
+        
+        transY.value = event.translationY;
+        console.log("active pan")      
+      },
+    
+      
+
+      onEnd: (event, ctx) => {
+
+        console.log("end pan")      
+      },
+    });
+
+  // måste veta OM drag, VILKET drag samt få events om position
 
   return (
+ 
    
     <View style={containerStyle}>
         <StatusBar backgroundColor={colors.background}  barStyle={theme === "white" ? "dark-content" : "light-content"}/>
@@ -217,15 +266,23 @@ export default function List({ navigation }) {
         <EmptyData info="Empty list"/>
      
       ) : (
+        
+        <View>
+          <PanGestureHandler  onGestureEvent={gestureHandler}>
+          <Animated.View style={[{backgroundColor: "pink", color: "white",
+           height: 90, width: "100%", position: "absolute", zIndex: 1000}, animatedPosition, animatedTransY]}></Animated.View>
+          </PanGestureHandler>
         <FlatList
           style={flatListStyle}
           data={tasks}
           ListFooterComponent={<View></View>}
           ListFooterComponentStyle={{width: window.width, height: 30}}
           keyboardShouldPersistTaps="handled"
+          removeClippedSubviews={false}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString() }
         />
+        </View>
       )}
 
       {!editMode && <NewTask list={currentList}/>}
@@ -241,6 +298,7 @@ export default function List({ navigation }) {
       </Pressable>}
    
       </View>
+    
  
   );
 }

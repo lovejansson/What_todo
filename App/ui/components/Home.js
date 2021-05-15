@@ -69,11 +69,11 @@ export default function Home({navigation}) {
 
   let scrollOffsetLocal = 0;
 
-  useEffect(scrollToOffset);
+  // useEffect(scrollToOffset);
 
   function navigateToList(item){
-    console.log(scrollOffsetLocal)
-    setScrollOffset(scrollOffsetLocal);
+    // console.log(scrollOffsetLocal)
+    // setScrollOffset(scrollOffsetLocal);
     setTasks(null);
     setCurrentList(null);
     setCurrentList(item);
@@ -96,20 +96,20 @@ export default function Home({navigation}) {
     )
   }
 
-  function scrollToOffset(){
-    console.log(scrollOffset)
+  // function scrollToOffset(){
+  //   console.log(scrollOffset)
 
-  return navigation.addListener("focus", ()=>{
+  // return navigation.addListener("focus", ()=>{
 
-    console.log("in focus");
-    console.log(scrollOffset); 
-    console.log(flatListRef.current)
+  //   console.log("in focus");
+  //   console.log(scrollOffset); 
+  //   console.log(flatListRef.current)
 
-    if( flatListRef.current !== null && scrollOffset){
-      flatListRef.current.scrollToOffset(scrollOffset);
-    }
-   });
-  }
+  //   if( flatListRef.current !== null && scrollOffset){
+  //     flatListRef.current.scrollToOffset(scrollOffset);
+  //   }
+  //  });
+  // }
 
   function onScroll(event){
     scrollOffsetLocal = event.nativeEvent.contentOffset.y;

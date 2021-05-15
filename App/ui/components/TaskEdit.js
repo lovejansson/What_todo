@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect} from "react";
 import {
   Text,
   StyleSheet,
@@ -14,9 +14,8 @@ import Icon from "react-native-vector-icons/AntDesign";
 import {DataContext} from "../../contexts/Data";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 import { NotificationContext } from "../../contexts/Notification";
-import { useEffect } from "react/cjs/react.development";
 
-const screen = Dimensions.get("window");
+const window = Dimensions.get("window");
 
 const styles = StyleSheet.create({
 
@@ -25,56 +24,52 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     height: 90,
-    width: screen.width,
+    width: window.width,
     paddingStart: 24,
     paddingEnd: 16,
-
   },
 
   input: {
     fontSize: 18,
     fontFamily: "Mukta-Regular",
     flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
 
   icon: {
-    padding: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   }
   
   
 });
 
 /*
-
 swipe to delete - done
-
 lägga till ny task - done
-
 markera som klar -> stryks  över bock/fyrkant att kryssa i -> done
-
 meny för att radera alla delete list / edit list / delete completed tasks / delete all tasks -> klar 
-
 hemsida med overview över de listor som finns + ikoner för att göra nya listor-> done
-
 bakgrundsbild -> done
-
 themes -> done 
-
 göra bättre kod angående uppdatera data -> done
-
 ändra teman via settings och spara nångstans -> done
-
-klicka på task för att ändra beskrivning  -> i morgon
-
+klicka på task för att ändra beskrivning  -> done
 anpassa rutig bakgrund efter skärmar/färger 
-
 testa komponenter -> nästa vecka 
-
 drag and drop för att ordna
-
 huvud meny på hemskärm: backup data, settings, send feedback
-
 setting screen : theme sync data språk?
+
+DRAG and DROP
+
+items lagrar order vilket initialt är antalet tex tasks/ lists som redan finns +1 när en task läggs till
+
+vid flytt så måste man switcha order attributet med varandra
+
+
+
 
 */
 
@@ -89,21 +84,20 @@ export default function TaskEdit({task, closeEditMode}){
     const notify = useContext(NotificationContext).notify;
 
     const iconStyle = [styles.icon, {color: colors.text}];
-    const inputStyle = [styles.input, {color: colors.text, backgroundColor: "red"}];
+    const inputStyle = [styles.input, {color: colors.text, backgroundColor: colors.background}];
 
    const [newDescription, setNewDescription] = useState(task.description);
 
-  //  useEffect(()=>{
+   useEffect(()=>{
 
-  //   const keyBoardHideHandler = ()=>{
-  //     closeEditMode();
-  //   };
+      const keyboardHideHandler = () => closeEditMode(false);
 
-  //   Keyboard.addListener("keyboardDidHide", keyBoardHideHandler );
+      Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
-  //   return(()=>{Keyboard.removeListener("keyboardDidHide", keyBoardHideHandler)}); 
-  //  },[])
- 
+      return () => Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
+
+   }, []);
+
    async function updateDescription(){
 
       if(newDescription === task.description){
@@ -124,20 +118,23 @@ export default function TaskEdit({task, closeEditMode}){
         return;
   
       }
+      
+      let updatedTask = {id: task.id, done: task.done, description: newDescription, dueDate: null};
 
       if(res){
         setTasks(oldTasks => {
           const idx = oldTasks.indexOf(task);
-          oldTasks[idx].description = newDescription;
+          oldTasks[idx] = updatedTask;
           return oldTasks;
       });
-      closeEditMode(false, {id: task.id, done: task.done, description: newDescription, dueDate: null});
+      closeEditMode({task: updatedTask});
     }else{
-      closeEditMode(false);
+      closeEditMode();
     }
   }
 
   return (
+ 
         <View style={styles.container}>
           <TextInput
           style={inputStyle}
@@ -156,7 +153,8 @@ export default function TaskEdit({task, closeEditMode}){
           <Pressable onPress={closeEditMode}>
             <Icon style={iconStyle} name="close" size={28}/>
           </Pressable>
-        </View> );
+        </View>
+         );
 }
 
 

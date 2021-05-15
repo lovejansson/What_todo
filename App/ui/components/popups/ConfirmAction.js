@@ -10,14 +10,10 @@ const styles = StyleSheet.create({
         top: window.height / 3,
         left: window.width / 2,
         width: window.width - 32,
-        transform: [{translateX: -120}],
+        transform: [{translateX: -window.width / 2 + 16}],
         paddingVertical: 16,
         paddingHorizontal: 24,
-        borderStyle: "solid",
-        borderTopWidth: 0.2,
-        borderStartWidth: 0.2,
-        borderBottomWidth: 2,
-        borderEndWidth: 2,
+        elevation: 4,
     },
 
     title: {
@@ -55,12 +51,13 @@ export default function ConfirmationDialog({title, message, actionOk, actionCanc
             <Text style={titleStyle}>{title}</Text>
             <Text style={messageStyle}>{message}</Text>
             <View style={styles.buttons}>
+            <TouchableOpacity onPress={actionCancel}>
+                    <Text style={buttonStyle}>Cancel</Text>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={actionOk}>
                     <Text style={buttonStyle}>Ok</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={actionCancel}>
-                    <Text style={buttonStyle}>Cancel</Text>
-                </TouchableOpacity>
+               
             </View>
         </View> 
     )

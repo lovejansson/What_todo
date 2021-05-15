@@ -2,17 +2,15 @@ import React, { useState, useEffect, useContext } from "react";
 import {
   Text,
   StyleSheet,
-  Pressable,
   Dimensions,
   View,
   ImageBackground,
-  TextInput,
-  TouchableHighlight
+  Pressable
 } from "react-native";
 import CheckBox from '@react-native-community/checkbox';
 
 import Animated, {useSharedValue, useAnimatedStyle, useAnimatedGestureHandler,
-   withSpring, runOnJS} from "react-native-reanimated";
+   withSpring, runOnJS, useAnimatedProps, withTiming} from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/AntDesign";
 
@@ -44,7 +42,7 @@ const styles = StyleSheet.create({
     fontFamily: "Mukta-Regular",
   },
   list: {
-backgroundColor: "red",
+
 height: "100%",
 justifyContent: "center"
   },
@@ -69,21 +67,9 @@ justifyContent: "center"
       borderBottomWidth: 1,
 
   },
-  editTask:{
-    flexDirection: "row",
-    width: screen.width * 0.78,
-    justifyContent:"space-between",
-    alignItems:"center"
-  },
-  editIcons: {
-    flexDirection: "row",
-  },
-
   input: {
     fontSize: 18,
     fontFamily: "Mukta-Regular"
-    
-
   },
   icon: {
     padding: 8,
@@ -95,40 +81,26 @@ justifyContent: "center"
 });
 
 /*
-
 swipe to delete - done
-
 lägga till ny task - done
-
 markera som klar -> stryks  över bock/fyrkant att kryssa i -> done
-
 meny för att radera alla delete list / edit list / delete completed tasks / delete all tasks -> klar 
-
 hemsida med overview över de listor som finns + ikoner för att göra nya listor-> done
-
 bakgrundsbild -> done
-
 themes -> done 
-
 göra bättre kod angående uppdatera data -> done
-
 ändra teman via settings och spara nångstans -> done
-
-klicka på task för att ändra beskrivning  -> i morgon
-
-anpassa rutig bakgrund efter skärmar/färger 
-
-testa komponenter -> nästa vecka 
-
+klicka på task för att ändra beskrivning  -> done
 drag and drop för att ordna
 
+
+anpassa rutig bakgrund efter skärmar/färger 
+testa komponenter -> nästa vecka 
 huvud meny på hemskärm: backup data, settings, send feedback
-
 setting screen : theme sync data ?
-
 */
 
-export default function TaskDetails({ task, openEditMode})
+export default function TaskDetails({ task, index, openEditMode, activateDrag})
 {
     /* CONTEXTS */
 
@@ -148,8 +120,13 @@ export default function TaskDetails({ task, openEditMode})
     const iconStyle = [styles.icon, {color: colors.text2}];
     const inputStyle = [styles.input, {color: colors.text}];
     const transX = useSharedValue(0);
+    const transY = useSharedValue(0);
     const height = useSharedValue(100);
     const opacity = useSharedValue(1);
+ 
+    const [offsetX, setOffsetX]= useState([-20, 1000000]);
+
+
 
     const animatedTransX = useAnimatedStyle(()=> {
         return ({
@@ -157,6 +134,13 @@ export default function TaskDetails({ task, openEditMode})
             transform: [{translateX: transX.value}]
         });
     });
+
+    const animatedTransY = useAnimatedStyle(()=>{
+
+      return({
+        transform: [{translateY: transY.value}]
+      })
+    })
 
     const animatedHeight = useAnimatedStyle(()=> {
 
@@ -172,14 +156,18 @@ export default function TaskDetails({ task, openEditMode})
         });
     });
 
+
  
     /* STATE */
 
    const [taskDone, setTaskDone] = useState(task.done === 1? true : false);
    const [descriptionStyle, setDescriptionStyle] = useState([styles.description, {color: colors.text}]);
+   const [activeXoffset, setActiveXoffset] = useState([-20, 100000]);
  
 
     useEffect(updateDescriptionStyle, [taskDone]);
+
+
 
     /* METHODS */
 
@@ -237,21 +225,30 @@ export default function TaskDetails({ task, openEditMode})
     }
 
 
+    function resetOffsetX(){
+      setOffsetX([-20, 1000000]);
+     
+    }
+
     const gestureHandler = useAnimatedGestureHandler({
         onStart: (event, ctx) => {   
           console.log("start pan")      
           },
           onActive: (event, ctx) => {
-          
-          console.log("active pan")
-           if(event.translationX < 0){
+        
+           if(offsetX[0] === 0){
+            
+            //  transY.value = event.translationY;
+            
+           }else if(event.translationX < 0){
             transX.value = event.translationX;
-         
            }
+
+        
           },
           onEnd: (event, ctx) => {
-
-            console.log("end pan")
+              // transY.value = withSpring(0, {}, runOnJS(resetOffsetX));
+  
           
             if(event.translationX < (screen.width * -0.6)){
                     transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
@@ -269,34 +266,42 @@ export default function TaskDetails({ task, openEditMode})
 
     });
 
+
+
+  function onLongPress(){
+    console.log("on long press")
+  setOffsetX([0, 0]);
+  activateDrag(index);
+  }
+
   const imageUrl = `../../images/background_${theme}_row.png`;
 
   return (
-    <Animated.View style={[styles.container, animatedHeight]}>
-     {/* // <PanGestureHandler activeOffsetX={[-20, 100000]} onGestureEvent={gestureHandler} > */}
+    <Animated.View style={[styles.container, animatedHeight, animatedTransY]}>
+      <PanGestureHandler activeOffsetX={offsetX} onGestureEvent={gestureHandler}>
         <Animated.View style={[animatedTransX, {zIndex: 1}]} >
 
-          <View style={contentStyle} >
+          <View style={contentStyle}>
             <CheckBox  tintColors={checkBoxColors} style={styles.checkbox} value={taskDone} 
                 onValueChange={updateDone}/>
                 
-            <TouchableHighlight
+            <Pressable
               style={styles.list}
+              onLongPress={onLongPress}
               onPress={openEditMode}>
                <Text style={descriptionStyle} numberOfLines={3} ellipsizeMode="tail" >{task.description}</Text>  
-            </TouchableHighlight>
+            </Pressable>
           </View>
         </Animated.View>
-      {/* </PanGestureHandler> */}
+      </PanGestureHandler>
     
       <ImageBackground source={theme === "black" ? require("../../images/background_dark_row.png") : require("../../images/background_light_row.png")} imageStyle={{resizeMode: "cover"}} style={actionRightStyle} >
       <Animated.View style={[animatedOpacity]}>
         <Icon style={deleteIconStyle} name="delete" size={28} />
       </Animated.View>
       </ImageBackground>
-  
+
     </Animated.View>
 );
 }
-
 

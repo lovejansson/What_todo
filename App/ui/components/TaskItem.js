@@ -1,51 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import TaskDetails from "./TaskDetails";
 import TaskEdit from "./TaskEdit";
 
 
-export default function TaskItem({task, editMode, toggleEditMode}){
-   const [editModeLocal, setEditModeLocal] = useState(false);
+export default function TaskItem({task, index, listEditMode, toggleEditMode, activateDrag}){
+   const [editMode, setEditMode] = useState(false);
 
-   let taskk = task;
-
-   useEffect(()=>{
-       if(!editMode){
-           setEditModeLocal(false);  
-       }
-
-   }, [editMode])
-
+   const [taskLocal, setTaskLocal] = useState(task);
 
    function openEditMode(){
-       console.log("openEditMode")
-       if(editMode){
-
+       if(listEditMode){
         Keyboard.dismiss();
-        toggleEditMode(false);
 
        }else{
-        setEditModeLocal(true);
-        toggleEditMode(true);
-       }
-     
+        setEditMode(true);
+        toggleEditMode();
+       } 
    }
 
-   function closeEditMode(newTask){
+   function closeEditMode(data){
 
-    if(newTask){
-        taskk = newTask;
-        
+    if(data.task){
+        setTaskLocal(data.task) // quicker ui update than waiting for DataContext to adjusts    
     }
 
-    console.log("close edit mode")
-     setEditModeLocal(false);
-     toggleEditMode(false);
+    setEditMode(false);
+    toggleEditMode();
      
    }
  
-    return (editModeLocal ? <TaskEdit task={taskk} closeEditMode={closeEditMode}/> 
-        : <TaskDetails task={taskk} openEditMode={openEditMode}/>);
+    return editMode ? <TaskEdit task={taskLocal} closeEditMode={closeEditMode}/> 
+        : <TaskDetails activateDrag={activateDrag} task={taskLocal} index={index} openEditMode={openEditMode}/>;
 
 }
-
