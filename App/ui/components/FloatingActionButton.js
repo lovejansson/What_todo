@@ -38,14 +38,23 @@ export default function FloatingActionButton({action, icon, style}){
   const iconStyle = {color: colors.mainButtonIcon};
 
 
-    function onPress(){
+    function onPressOut(){
 
         action();
-        
-        transY.value = withSequence(withTiming(0, {duration: 40}), withTiming(-5, {duration:200}));
-        
-        transX.value = withSequence(withTiming(0, {duration: 40}), withTiming(-5, {duration: 200}));
 
+        transY.value = withTiming(-5, {duration: 40});
+        transX.value = withTiming(-5, {duration: 40});
+        
+       
+    }
+
+    function onPressIn(){
+
+      transY.value = withTiming(0, {duration: 40});
+      transX.value = withTiming(0, {duration: 40});
+
+
+    
     }
 
 
@@ -53,7 +62,7 @@ export default function FloatingActionButton({action, icon, style}){
         <View style={buttonContainerstyle}>
           <Animated.View
             style={buttonStyle}>
-          <TouchableWithoutFeedback  onPress={onPress}>
+          <TouchableWithoutFeedback onPressIn={onPressIn} onPressOut={onPressOut}>
             <Icon
               style={iconStyle}
               name={icon}

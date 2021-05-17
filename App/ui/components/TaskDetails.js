@@ -100,7 +100,7 @@ huvud meny på hemskärm: backup data, settings, send feedback
 setting screen : theme sync data ?
 */
 
-export default function TaskDetails({ task, index, openEditMode, activateDrag})
+export default function TaskDetails({ navigation, task, index, openEditMode, activateDrag})
 {
     /* CONTEXTS */
 
@@ -156,8 +156,6 @@ export default function TaskDetails({ task, index, openEditMode, activateDrag})
         });
     });
 
-
- 
     /* STATE */
 
    const [taskDone, setTaskDone] = useState(task.done === 1? true : false);
@@ -166,8 +164,6 @@ export default function TaskDetails({ task, index, openEditMode, activateDrag})
  
 
     useEffect(updateDescriptionStyle, [taskDone]);
-
-
 
     /* METHODS */
 
@@ -194,11 +190,11 @@ export default function TaskDetails({ task, index, openEditMode, activateDrag})
         notify("Could not update task", Status.ERROR);
       }
       if(res){
-        setTasks(oldTasks => {
-          const idx = oldTasks.indexOf(task);
-          oldTasks[idx].done = value;
-          return oldTasks;
-        }); 
+        // setTasks(oldTasks => {
+        //   // const idx = oldTasks.indexOf(task);
+        //   // oldTasks[idx].done = value;
+        //   // return oldTasks;
+        // }); 
       }
     }
 
@@ -238,7 +234,7 @@ export default function TaskDetails({ task, index, openEditMode, activateDrag})
         
            if(offsetX[0] === 0){
             
-            //  transY.value = event.translationY;
+             transY.value = event.translationY;
             
            }else if(event.translationX < 0){
             transX.value = event.translationX;
@@ -247,7 +243,7 @@ export default function TaskDetails({ task, index, openEditMode, activateDrag})
         
           },
           onEnd: (event, ctx) => {
-              // transY.value = withSpring(0, {}, runOnJS(resetOffsetX));
+               transY.value = withSpring(0, {}, runOnJS(resetOffsetX));
   
           
             if(event.translationX < (screen.width * -0.6)){
@@ -271,15 +267,16 @@ export default function TaskDetails({ task, index, openEditMode, activateDrag})
   function onLongPress(){
     console.log("on long press")
   setOffsetX([0, 0]);
-  activateDrag(index);
+  
   }
 
   const imageUrl = `../../images/background_${theme}_row.png`;
 
   return (
-    <Animated.View style={[styles.container, animatedHeight, animatedTransY]}>
+   
+    <Animated.View style={[styles.container, animatedHeight]}>
       <PanGestureHandler activeOffsetX={offsetX} onGestureEvent={gestureHandler}>
-        <Animated.View style={[animatedTransX, {zIndex: 1}]} >
+        <Animated.View style={[animatedTransX, animatedTransY, {zIndex: 1}]} >
 
           <View style={contentStyle}>
             <CheckBox  tintColors={checkBoxColors} style={styles.checkbox} value={taskDone} 

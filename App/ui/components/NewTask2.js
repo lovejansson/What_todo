@@ -23,6 +23,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
+    position: "absolute",
+    bottom: 0
     
   },
   input: {
@@ -48,17 +50,17 @@ export default function NewTask() {
   const currentList = useContext(DataContext).currentList;
   const setLists = useContext(DataContext).setLists;
   const setTasks = useContext(DataContext).setTasks;
+  
 
   const containerStyle = [styles.container, {backgroundColor: colors.background}];
   const inputStyle= [styles.input, {backgroundColor: colors.background, color: colors.text, borderColor: colors.text2}];
 
-  const [description, setDescription] = useState("");
-  const [btnIcon, setBtnIcon] = useState("plus");
+  const [todos, setTodos] = useState("");
+ 
 
   async function onSave() {
     dismissKeyboard();
-    setDescription("");
-    insertTask(currentList, description);
+    insertTask(currentList, todos);
    
   }
 
@@ -112,29 +114,21 @@ export default function NewTask() {
   }
 
   return (
-
-      <View style={containerStyle}>
+      <View style={[containerStyle]}>
         
-        <TextInput
-          style={inputStyle}
-          placeholder="What todo..."
-          keyboardType="ascii-capable"
-          placeholderTextColor={colors.text2}
-          selectionColor={colors.text}
-          multiline={true}
-          value={description}
-          onChangeText={(value) => {
-            if(value && value.length > 0){
-              setBtnIcon("check");
-            }else{
-              setBtnIcon("plus")
-            }
-            setDescription(value);
-          }}
-        />
+    <TextInput
+    
+      style={inputStyle}
+      placeholder="Type your todos, 1 per line ..."
+      keyboardType="ascii-capable"
+      placeholderTextColor={colors.text2}
+      selectionColor={colors.text}
+      multiline={true}
+      value={description}
+     
+    />
 
-        <FloatingActionButton action={onSave} icon={btnIcon}/>
+    <FloatingActionButton action={onSave} icon="check"/>
 
-      </View>
-  );
+  </View> )
 }

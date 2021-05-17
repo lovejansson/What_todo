@@ -157,6 +157,7 @@ export default function NewList({ navigation }) {
       
       <View>
         <TextInput
+        
           style={inputStyle}
           value = {chosenListName}
           placeholder="Name"

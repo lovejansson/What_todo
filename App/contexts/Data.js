@@ -19,6 +19,19 @@ export const DataProvider = (props) => {
 
   console.log(db)
 
+ function refreshTasks(){
+    db.getTasksInList(currentList.id)
+    .then((res) => {
+      setTasks(res);
+      setLoading(false);
+    })
+    .catch((error) => {
+      console.log(error);
+      setLoading(false);
+    });
+
+  }
+
 
 useEffect(() => {
     setLoading(true);
@@ -57,7 +70,7 @@ useEffect(() => {
   return (
     <DataContext.Provider
       value={{ db, loading, lists, setLists, tasks, setTasks,
-         currentList, setCurrentList, scrollOffset, setScrollOffset}}>
+         currentList, setCurrentList, scrollOffset, setScrollOffset, refreshTasks}}>
       {props.children}
     </DataContext.Provider>
   );

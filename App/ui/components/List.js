@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   View,
   FlatList,
+  ScrollView,
   StyleSheet,
   Pressable,
   StatusBar,
@@ -15,29 +16,50 @@ import { NotificationContext } from "../../contexts/Notification";
 
 import TaskItem from "./TaskItem";
 import ListHeader from "./ListHeader";
-import NewTask from "./NewTask.js";
+import AddTodos from "./AddTodos";
 import Menu from "./Menu";
 import ConfirmAction from "./popups/ConfirmAction";
 import EmptyData from "./EmptyData";
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue} from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
-import { transformSync } from "@babel/core";
+import FloatingActionButton from "./FloatingActionButton";
+
 
 
 const window = Dimensions.get("window");
 
+const statusBarHeight = StatusBar.currentHeight;
+
 const styles = StyleSheet.create({
 
 
-    container: {height: "100%", paddingBottom: 16,},
+    container: {flex: 1},
 
+    buttonContainer: {
+    //   position: "absolute",
+    //   backgroundColor: "red",
+    
+    // left: 0,
+    // top: window.height - 135,
+  
+    // right: 0,
+    // bottom: 0,
+    // height: 110,
+    // borderColor: "green",
+    // borderBottomWidth: 4,
+    
 
-  button: {
-    position: "absolute",
-    borderRadius: 50,
-    end: 24,
-    bottom: 32,
-  },
+    }
+
+,
+button: {
+  position: "absolute",
+  top: window.height - 52 - statusBarHeight- 32,
+
+  right: 24,
+  bottom: 32,
+
+},
   icon: {
     paddingVertical: 18,
     paddingHorizontal: 18,
@@ -59,6 +81,9 @@ export default function List({ navigation }) {
   const db = useContext(DataContext).db;
   const setTasks= useContext(DataContext).setTasks;
   const setLists = useContext(DataContext).setLists;
+  const refreshTasks = useContext(DataContext).refreshTasks;
+
+  const positions = useSharedValue(tasks);
 
   
   const currentList = useContext(DataContext).currentList;
@@ -77,7 +102,9 @@ export default function List({ navigation }) {
   const editListItem = {icon: "edit", title: "Edit list", action: openEditList};
   const deleteCompletedItem =  {icon: "closecircleo", title: "Delete completed tasks", action: deleteCompletedTasks};
 
-  const menuItems = [deleteListItem, editListItem,deleteCompletedItem ]
+  const menuItems = [deleteListItem, editListItem,deleteCompletedItem ];
+
+  const panRef = useRef();
 
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirmActionDialog, setShowConfirmationDialog] = useState(false);
@@ -108,6 +135,7 @@ export default function List({ navigation }) {
 
 
   useEffect(()=>{
+  
     if(tasks){
 
       if(tasks.length > 0){
@@ -116,6 +144,8 @@ export default function List({ navigation }) {
       }else{
         setEmptyList(true);
       }
+    }else{
+      setEmptyList(true)
     }
   }, [tasks]);
 
@@ -123,8 +153,10 @@ export default function List({ navigation }) {
 
     const keyboardHideHandler = () => {
       console.log("keyboard shows false list")
-      
-      setKeyboardShows(false)};
+      if(editMode.value === true){
+        editMode.value = false
+      }
+   };
     const keyboardShowHandler = () => setKeyboardShows(true);
     Keyboard.addListener("keyboardDidShow", keyboardShowHandler);
     Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
@@ -162,9 +194,10 @@ export default function List({ navigation }) {
     }
 
     if(deleted){
-        let newTasks = tasks.filter(t => { return t.done === false || t.done === 0})
-        console.log(newTasks);
-        setTasks(newTasks);
+        // let newTasks = tasks.filter(t => { return t.done === false || t.done === 0})
+        // console.log(newTasks);
+        // setTasks(newTasks);
+        refreshTasks();
     }
 
   }
@@ -192,30 +225,30 @@ export default function List({ navigation }) {
     }
   }
 
-  const [editMode, setEditMode] = useState(false);
+  // const [editMode, setEditMode] = useState(false);
+
+  const editMode = useSharedValue(false);
 
   function toggleEditMode(){
+    editMode.value = !editMode.value;
+    // if(editMode && keyboardShows){
 
-    
+    //   console.log("keyboardshows and editmode")
+    // console.log(editMode);
+    // console.log(keyboardShows)
+    //     Keyboard.dismiss();
 
-    if(editMode && keyboardShows){
+    //     // waiting to change edit mode so that NewTask is displayed after keyboard is hidden
+    //     const keyboardHideHandler = () => {
+    //       setEditMode(!editMode);
+    //       Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
+    //     }
+    //     Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
-      console.log("keyboardshows and editmode")
-    console.log(editMode);
-    console.log(keyboardShows)
-        Keyboard.dismiss();
-
-        // waiting to change edit mode so that NewTask is displayed after keyboard is hidden
-        const keyboardHideHandler = () => {
-          setEditMode(!editMode);
-          Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
-        }
-        Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
-
-    }else{
-      console.log("HEj")
-      setEditMode(!editMode);
-    }
+    // }else{
+    //   console.log("HEj")
+    //   setEditMode(!editMode);
+    // }
   }
 
   function activateDrag(index){
@@ -230,7 +263,12 @@ export default function List({ navigation }) {
 
   function renderItem({item, index}){
    
-      return <TaskItem task={item} index={index} listEditMode={editMode} toggleEditMode={toggleEditMode} activateDrag={activateDrag}/>
+      return <TaskItem navigation={navigation} 
+      task={item} index={index} listEditMode={editMode} toggleEditMode={toggleEditMode} activateDrag={activateDrag}/>
+  }
+
+  function navigateToAddTodos(){
+    navigation.navigate("AddTodos");
   }
 
   const gestureHandler = useAnimatedGestureHandler({
@@ -258,34 +296,40 @@ export default function List({ navigation }) {
  
    
     <View style={containerStyle}>
-        <StatusBar backgroundColor={colors.background}  barStyle={theme === "white" ? "dark-content" : "light-content"}/>
+        <StatusBar backgroundColor={colors.background}  
+        barStyle={theme === "white" ? "dark-content" : "light-content"}/>
       <ListHeader navigation={navigation}
       actionRight={toggleShowMenu} />
 
-      { emptyList ? (
+      { emptyList|| tasks === null ? (
         <EmptyData info="Empty list"/>
      
       ) : (
         
-        <View>
-          <PanGestureHandler  onGestureEvent={gestureHandler}>
-          <Animated.View style={[{backgroundColor: "pink", color: "white",
-           height: 90, width: "100%", position: "absolute", zIndex: 1000}, animatedPosition, animatedTransY]}></Animated.View>
-          </PanGestureHandler>
+//         <ScrollView style={{flex: 1}}>
+
+// {tasks.map((task, index) => (
+//              <TaskItem task={task} index={index} 
+//              listEditMode={editMode} 
+//              toggleEditMode={toggleEditMode} activateDrag={activateDrag}/>
+//             ))}
+      
         <FlatList
-          style={flatListStyle}
+          style={{flex: 1,}}
           data={tasks}
-          ListFooterComponent={<View></View>}
-          ListFooterComponentStyle={{width: window.width, height: 30}}
+         
           keyboardShouldPersistTaps="handled"
           removeClippedSubviews={false}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString() }
         />
-        </View>
+       
+      //  </ScrollView>
       )}
-
-      {!editMode && <NewTask list={currentList}/>}
+{/* <NewTask list={currentList}/> */}
+{/* <View style={styles.buttonContainer}> */}
+ <FloatingActionButton action={navigateToAddTodos} style={styles.button} icon="plus"/>
+ {/* </View> */}
     
       {showMenu && 
         <Pressable onPress={toggleShowMenu} style={styles.overlay}>
@@ -294,11 +338,9 @@ export default function List({ navigation }) {
      
       {showConfirmActionDialog && 
       <Pressable style={[styles.overlay, {zIndex: 4}]} onPress={toggleShowConfirmationDialog}>
-        <ConfirmAction title="Do you want to delete this list?" message="The added items will also be deleted." actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
+        <ConfirmAction title="Do you want to delete this list?" message="The added items will also be deleted." 
+        actionCancel={toggleShowConfirmationDialog} actionOk={deleteList}/>
       </Pressable>}
-   
       </View>
-    
- 
   );
 }

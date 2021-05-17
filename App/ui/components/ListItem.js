@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
 import {
   Text,
@@ -16,6 +16,8 @@ import Emoji from 'react-native-emoji';
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 
 const window = Dimensions.get("window");
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -57,6 +59,11 @@ export default function ListItem({ item, onPress }) {
   const containerStyle = [styles.container, {backgroundColor: "red"}];
   const nameStyle = [styles.name, {color: colors.text}];
   const countStyle = [styles.count, {color: colors.text2}];
+  useEffect(()=>{
+
+    console.log("list item")
+  
+  }, [])
 
   return (
       <TouchableOpacity style={containerStyle} onPress={onPress}>

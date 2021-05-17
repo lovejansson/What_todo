@@ -1,5 +1,6 @@
 export const colorsBlackTheme = Object.freeze({
 
+    rootView: {r: 18, g: 18, b: 18, a: 1},
 mainButton: "#7cb2f0",
 mainButtonShadow: "#123c6b",
 mainButtonIcon: "#fff",
@@ -20,9 +21,13 @@ uncheck: "#fff",
 });
 
 export const colorsWhiteTheme = Object.freeze({
+
+    rootView: {r: 255, g: 255, b: 255, a: 1},
+
     mainButton: "#0267f5",
     mainButtonShadow: "#013a8a",
     mainButtonIcon: "#fff",
+
     text: "#292929",
     text2: "#3b3b3b",
     text3: "#3b3b3b",
@@ -40,6 +45,7 @@ export const colorsWhiteTheme = Object.freeze({
 });
 
 export const colorsGreyTheme = Object.freeze({
+    rootView: {r: 55, g: 59, b: 69, a: 1},
     mainButton: "#7cb2f0",
     mainButtonShadow: "#123c6b",
     mainButtonIcon: "#fff",

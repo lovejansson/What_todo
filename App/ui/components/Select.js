@@ -15,14 +15,7 @@ const styles = StyleSheet.create({
        
     },
     flatList: {
-        borderBottomWidth: 2,
-        borderRightWidth: 3,
-        borderTopWidth: 0.5,
-        borderLeftWidth: 0.5,
-        
-    
-        
-
+      elevation: 4,
     },
     overlay: {
         position: "absolute",

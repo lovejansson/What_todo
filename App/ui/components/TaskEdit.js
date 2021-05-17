@@ -22,24 +22,26 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-
+    flex: 1,
     height: 90,
+    backgroundColor:"transparent",
     width: window.width,
-    paddingStart: 24,
-    paddingEnd: 16,
   },
 
   input: {
     fontSize: 18,
     fontFamily: "Mukta-Regular",
     flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingStart: 24,
+    
+    paddingEnd: 2,
+    height:90
+
   },
 
   icon: {
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    
+    paddingHorizontal: 16,
   }
   
   
@@ -88,15 +90,15 @@ export default function TaskEdit({task, closeEditMode}){
 
    const [newDescription, setNewDescription] = useState(task.description);
 
-   useEffect(()=>{
+  //  useEffect(()=>{
 
-      const keyboardHideHandler = () => closeEditMode(false);
+  //     const keyboardHideHandler = () => closeEditMode(false);
 
-      Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
+  //     Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
-      return () => Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
+  //     return () => Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
 
-   }, []);
+  //  }, []);
 
    async function updateDescription(){
 
@@ -116,17 +118,17 @@ export default function TaskEdit({task, closeEditMode}){
       }catch(error){
         notify("Could not update task", Status.ERROR);
         return;
-  
+
       }
       
       let updatedTask = {id: task.id, done: task.done, description: newDescription, dueDate: null};
 
       if(res){
-        setTasks(oldTasks => {
-          const idx = oldTasks.indexOf(task);
-          oldTasks[idx] = updatedTask;
-          return oldTasks;
-      });
+        // setTasks(oldTasks => {
+        //   const idx = oldTasks.indexOf(task);
+        //   oldTasks[idx] = updatedTask;
+        //   return oldTasks;
+      // });
       closeEditMode({task: updatedTask});
     }else{
       closeEditMode();

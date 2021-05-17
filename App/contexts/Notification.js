@@ -93,16 +93,11 @@ let [msgStyle, setMsgStyle] = useState([styles.msg]);
   return (
     <NotificationContext.Provider value={{setMsg, showMsg, notify, Status}}>
 
-      
-
       {children}
 
       <Animated.View style={containerStyle} >
             <Text style={msgStyle}>{msg}</Text>
         </Animated.View>
-      
-    
-    
     </NotificationContext.Provider>
   );
 };

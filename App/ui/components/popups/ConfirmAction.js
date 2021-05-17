@@ -1,6 +1,7 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect} from "react";
 import { View, Text, StyleSheet, Dimensions, ImageBackground, TouchableOpacity} from "react-native";
 import {ColorThemeContext} from "../../../contexts/ColorTheme";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
 
 const window = Dimensions.get("window");
 
@@ -46,8 +47,24 @@ export default function ConfirmationDialog({title, message, actionOk, actionCanc
     const buttonStyle = [styles.button, {color: colors.text}];
     const containerStyle = [styles.container, {backgroundColor: colors.backgroundMenu, borderColor: colors.borderMenu}];
 
+    const scale = useSharedValue(0);
+
+    useEffect(()=>{
+
+        scale.value = withSpring(1, {damping: 30, stiffness: 500, overshootClamping: false});
+
+    },[]);
+
+    const animatedScale = useAnimatedStyle(()=> {
+        return ({
+                transform: [{scale: scale.value},{translateX: -window.width / 2 + 16} ]
+                
+            });
+    });
+
+
     return(
-        <View style={containerStyle}>
+        <Animated.View style={[containerStyle, animatedScale]}>
             <Text style={titleStyle}>{title}</Text>
             <Text style={messageStyle}>{message}</Text>
             <View style={styles.buttons}>
@@ -59,6 +76,6 @@ export default function ConfirmationDialog({title, message, actionOk, actionCanc
                 </TouchableOpacity>
                
             </View>
-        </View> 
+        </Animated.View> 
     )
 }
