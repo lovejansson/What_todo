@@ -54,7 +54,7 @@ export const colorsGreyTheme = Object.freeze({
     text3: "#595f6e",
     heading:"#fff",
     icon: "#e8e8ed",
-
+    backgroundDark: "#2d3039",
     background: "#373b45",
     background2: "#4f5259", // samma som ena checker 
     separator: "#494f5b",

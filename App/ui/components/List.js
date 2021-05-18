@@ -8,6 +8,8 @@ import {
   StatusBar,
   Keyboard,
   Dimensions,
+  KeyboardAvoidingView,
+  ImageBackground,
 } from "react-native";
 import { DataContext } from "../../contexts/Data";
 import { ColorThemeContext } from "../../contexts/ColorTheme";
@@ -74,22 +76,32 @@ button: {
 },
 });
 
+function toPositions(tasks){
+  let positions = {}
+  tasks.forEach((task, idx) =>{
+      positions[task.id] = idx;
+  });
+
+  return positions;
+
+}
+
 
 export default function List({ navigation }) {
   const colors = useContext(ColorThemeContext).colors;
   const theme = useContext(ColorThemeContext).theme;
   const db = useContext(DataContext).db;
-  const setTasks= useContext(DataContext).setTasks;
   const setLists = useContext(DataContext).setLists;
   const refreshTasks = useContext(DataContext).refreshTasks;
 
-  const positions = useSharedValue(tasks);
+ 
 
   
   const currentList = useContext(DataContext).currentList;
   const loading = useContext(DataContext).loading;
 
   const tasks = useContext(DataContext).tasks;
+  const positions = useSharedValue(null);
 
   const containerStyle = [styles.container, {backgroundColor: colors.background}];
   
@@ -104,35 +116,11 @@ export default function List({ navigation }) {
 
   const menuItems = [deleteListItem, editListItem,deleteCompletedItem ];
 
-  const panRef = useRef();
-
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirmActionDialog, setShowConfirmationDialog] = useState(false);
-  const [flatListStyle, setFlatListStyle] = useState(styles.flatList);
+  
 
   const [emptyList, setEmptyList] = useState(false);
-
-  const [keyboardShows, setKeyboardShows] = useState(false);
-
-  const posY = useSharedValue(0);
-  const transY = useSharedValue(0);
-
-  const animatedPosition = useAnimatedStyle(()=>{
-    return({
-
-      top: posY.value,
-      left: 0,
-
-    })
-  })
-
-  const animatedTransY = useAnimatedStyle(()=> {
-
-    return({
-      transform: [{translateY: transY.value}]
-    })
-  })
-
 
   useEffect(()=>{
   
@@ -140,6 +128,7 @@ export default function List({ navigation }) {
 
       if(tasks.length > 0){
         setEmptyList(false);
+        positions.value = toPositions(tasks);
 
       }else{
         setEmptyList(true);
@@ -157,16 +146,55 @@ export default function List({ navigation }) {
         editMode.value = false
       }
    };
-    const keyboardShowHandler = () => setKeyboardShows(true);
-    Keyboard.addListener("keyboardDidShow", keyboardShowHandler);
+
     Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
 
     return(()=>{
-      Keyboard.removeAllListeners("keyBoardDidShow");
+   
       Keyboard.removeAllListeners("keyBoardDidHide");
     });
 
   }, []);
+
+
+  function updatePositions(task, direction){
+    
+
+    "worklet";
+
+    let positionsCopy = JSON.parse(JSON.stringify(positions.value));
+    
+
+    let newPos = positionsCopy[task.id] + direction;
+
+    if(newPos < 0){
+      return;
+    }
+    
+    
+
+    let values = Object.values(positionsCopy);
+    let ids = Object.keys(positionsCopy);
+
+    if(newPos > values.length - 1){
+      return;
+    }
+
+    console.log(newPos)
+
+    for(let i = 0; i < values.length; ++i){
+      if(values[i] === newPos ){
+        positionsCopy[ids[i]] -= direction;
+        break;
+      }
+    }
+
+    positionsCopy[task.id] += direction; 
+
+    positions.value = positionsCopy;
+  
+
+  }
 
   function toggleShowMenu(){
       setShowMenu(!showMenu);
@@ -194,9 +222,6 @@ export default function List({ navigation }) {
     }
 
     if(deleted){
-        // let newTasks = tasks.filter(t => { return t.done === false || t.done === 0})
-        // console.log(newTasks);
-        // setTasks(newTasks);
         refreshTasks();
     }
 
@@ -231,36 +256,24 @@ export default function List({ navigation }) {
 
   function toggleEditMode(){
     editMode.value = !editMode.value;
-    // if(editMode && keyboardShows){
-
-    //   console.log("keyboardshows and editmode")
-    // console.log(editMode);
-    // console.log(keyboardShows)
-    //     Keyboard.dismiss();
-
-    //     // waiting to change edit mode so that NewTask is displayed after keyboard is hidden
-    //     const keyboardHideHandler = () => {
-    //       setEditMode(!editMode);
-    //       Keyboard.removeListener("keyboardDidHide", keyboardHideHandler);
-    //     }
-    //     Keyboard.addListener("keyboardDidHide", keyboardHideHandler);
-
-    // }else{
-    //   console.log("HEj")
-    //   setEditMode(!editMode);
-    // }
   }
 
-  function activateDrag(index){
-    console.log("activate drag");
-    posY.value = index * 90;
-    transY.value = 0;
 
    
-    /// synlighet för drag elementet precis ovanför det element som ska draggas?
-    // aktivera, positionera,
-  }
+  /*
+  
+  listan ska hålla reda på en array av positioner/sorteringen -> sharedValue
+  
+  TaskItem "lyssnar på" arrayen och om just dens position ändras så ändrar man translateY (sharedValue)
+  antingen += 90 eller -= 90 (HEIGHT av ett item)
 
+  TaskItem som rör på sig kommer att aktiver "onActive" metoden där man kan kolla translateY värdet. 
+  Om detta är antingen större än 45 eller mindre än -45 så ska man anropa en funktion som swapar positioner i positions arrayen
+    TransY värdet uppdateras alltid efter hand i onActive
+
+    onEnd: placera elementet enligt ny position + uppdatera sorteringen i db enligt positions (item id och positionering)
+  
+  */
   function renderItem({item, index}){
    
       return <TaskItem navigation={navigation} 
@@ -270,26 +283,6 @@ export default function List({ navigation }) {
   function navigateToAddTodos(){
     navigation.navigate("AddTodos");
   }
-
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (event, ctx) => {   
-      console.log("start pan")      
-      },
-      onActive: (event, ctx) => {
-     
-        
-        transY.value = event.translationY;
-        console.log("active pan")      
-      },
-    
-      
-
-      onEnd: (event, ctx) => {
-
-        console.log("end pan")      
-      },
-    });
-
   // måste veta OM drag, VILKET drag samt få events om position
 
   return (
@@ -305,31 +298,24 @@ export default function List({ navigation }) {
         <EmptyData info="Empty list"/>
      
       ) : (
-        
-//         <ScrollView style={{flex: 1}}>
 
-// {tasks.map((task, index) => (
-//              <TaskItem task={task} index={index} 
-//              listEditMode={editMode} 
-//              toggleEditMode={toggleEditMode} activateDrag={activateDrag}/>
-//             ))}
-      
-        <FlatList
-          style={{flex: 1,}}
-          data={tasks}
-         
-          keyboardShouldPersistTaps="handled"
-          removeClippedSubviews={false}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString() }
-        />
+        
        
-      //  </ScrollView>
+        <ScrollView  contentContainerStyle={{height: window.height,backgroundColor: colors.backgroundDark}} keyboardShouldPersistTaps="handled">
+
+            {tasks.map((task, index) => (
+             <TaskItem task={task} index={index} positions={positions} updatePositions={updatePositions}
+             listEditMode={editMode} 
+             toggleEditMode={toggleEditMode} />
+            ))}
+       
+        </ScrollView>
+      
+     
       )}
-{/* <NewTask list={currentList}/> */}
-{/* <View style={styles.buttonContainer}> */}
- <FloatingActionButton action={navigateToAddTodos} style={styles.button} icon="plus"/>
- {/* </View> */}
+
+    <FloatingActionButton action={navigateToAddTodos} style={styles.button} icon="plus"/>
+ 
     
       {showMenu && 
         <Pressable onPress={toggleShowMenu} style={styles.overlay}>

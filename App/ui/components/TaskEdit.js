@@ -15,6 +15,8 @@ import {DataContext} from "../../contexts/Data";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 import { NotificationContext } from "../../contexts/Notification";
 
+import Animated, {useAnimatedReaction, useAnimatedStyle, useSharedValue} from "react-native-reanimated";
+
 const window = Dimensions.get("window");
 
 const styles = StyleSheet.create({
@@ -22,9 +24,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
+    position: "absolute",
     flex: 1,
     height: 90,
-    backgroundColor:"transparent",
+  
     width: window.width,
   },
 
@@ -75,7 +78,7 @@ vid flytt så måste man switcha order attributet med varandra
 
 */
 
-export default function TaskEdit({task, closeEditMode}){
+export default function TaskEdit({task, closeEditMode, topPos}){
 
     const db = useContext(DataContext).db;
     const setTasks = useContext(DataContext).setTasks;
@@ -85,10 +88,22 @@ export default function TaskEdit({task, closeEditMode}){
     const Status = useContext(NotificationContext).Status;
     const notify = useContext(NotificationContext).notify;
 
+    const containerStyle = [styles.container, {backgroundColor: colors.background}]
     const iconStyle = [styles.icon, {color: colors.text}];
-    const inputStyle = [styles.input, {color: colors.text, backgroundColor: colors.background}];
+    const inputStyle = [styles.input, {color: colors.text}];
 
    const [newDescription, setNewDescription] = useState(task.description);
+
+
+
+   const animatedTopPos = useAnimatedStyle(()=>{
+     return({
+      top: topPos.value,
+      left: 0,
+      right: 0,
+
+     })
+   })
 
   //  useEffect(()=>{
 
@@ -137,7 +152,7 @@ export default function TaskEdit({task, closeEditMode}){
 
   return (
  
-        <View style={styles.container}>
+        <Animated.View style={[containerStyle, animatedTopPos]}>
           <TextInput
           style={inputStyle}
             autoFocus={true}
@@ -155,7 +170,7 @@ export default function TaskEdit({task, closeEditMode}){
           <Pressable onPress={closeEditMode}>
             <Icon style={iconStyle} name="close" size={28}/>
           </Pressable>
-        </View>
+        </Animated.View>
          );
 }
 

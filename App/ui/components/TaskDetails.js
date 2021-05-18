@@ -5,12 +5,15 @@ import {
   Dimensions,
   View,
   ImageBackground,
-  Pressable
+  Pressable,
+  Vibration,
+  TouchableWithoutFeedback,
+  TouchableHighlight
 } from "react-native";
 import CheckBox from '@react-native-community/checkbox';
 
 import Animated, {useSharedValue, useAnimatedStyle, useAnimatedGestureHandler,
-   withSpring, runOnJS, useAnimatedProps, withTiming} from "react-native-reanimated";
+   withSpring, runOnJS, useAnimatedProps, withTiming, useAnimatedReaction} from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/AntDesign";
 
@@ -24,6 +27,8 @@ const styles = StyleSheet.create({
 
   container: {
     flexDirection: "row",
+
+    position: "absolute",
     height: 90,
     width: screen.width,
 
@@ -62,9 +67,17 @@ justifyContent: "center"
   },
   deleteIcon:{
       marginEnd: 16,
-      padding: 8,
-      borderRightWidth: 1,
-      borderBottomWidth: 1,
+      backgroundColor: "transparent",
+
+      
+  
+      position: "absolute",
+      top:28,
+      bottom: 0,
+      alignItems: "center",
+    
+      right: 0,
+      zIndex: 0, 
 
   },
   input: {
@@ -100,7 +113,7 @@ huvud meny på hemskärm: backup data, settings, send feedback
 setting screen : theme sync data ?
 */
 
-export default function TaskDetails({ navigation, task, index, openEditMode, activateDrag})
+export default function TaskDetails({ navigation, task, index, openEditMode, positions, updatePositions})
 {
     /* CONTEXTS */
 
@@ -115,17 +128,20 @@ export default function TaskDetails({ navigation, task, index, openEditMode, act
 
     let contentStyle = [styles.content, {backgroundColor: colors.background}];
     let actionRightStyle = [styles.actionRight];
-    const deleteIconStyle = [styles.deleteIcon, {color: colors.text2, backgroundColor: colors.background2, borderColor: colors.borderLayer3}];
+    const deleteIconStyle = [styles.deleteIcon, {color: colors.text2}];
     const checkBoxColors = {true: colors.check, false: colors.uncheck};
     const iconStyle = [styles.icon, {color: colors.text2}];
     const inputStyle = [styles.input, {color: colors.text}];
     const transX = useSharedValue(0);
     const transY = useSharedValue(0);
-    const height = useSharedValue(100);
+    const height = useSharedValue(90);
     const opacity = useSharedValue(1);
+
+    const topPos = useSharedValue(positions.value[task.id] * 90);
+
+
  
     const [offsetX, setOffsetX]= useState([-20, 1000000]);
-
 
 
     const animatedTransX = useAnimatedStyle(()=> {
@@ -160,7 +176,34 @@ export default function TaskDetails({ navigation, task, index, openEditMode, act
 
    const [taskDone, setTaskDone] = useState(task.done === 1? true : false);
    const [descriptionStyle, setDescriptionStyle] = useState([styles.description, {color: colors.text}]);
-   const [activeXoffset, setActiveXoffset] = useState([-20, 100000]);
+   const [dragging, setDragging] = useState(false);
+
+   
+   const animatedTopPos = useAnimatedStyle(()=>{
+
+    return({
+      top: topPos.value,
+      zIndex: dragging ? 4 : 0,
+      left: 0,
+      right: 0,
+    
+    })
+  }, [dragging]);
+
+
+  useAnimatedReaction(()=>{
+    return positions.value[task.id];
+  }, (curr, prev) => {
+
+     if(curr !== prev && prev !== null && !dragging){
+     
+        console.log("new positions")
+        console.log(task.description)
+      
+        topPos.value = withSpring(curr * 90, {overshootClamping: true});
+    }
+});
+ 
  
 
     useEffect(updateDescriptionStyle, [taskDone]);
@@ -220,22 +263,61 @@ export default function TaskDetails({ navigation, task, index, openEditMode, act
       }
     }
 
-
-    function resetOffsetX(){
-      setOffsetX([-20, 1000000]);
-     
-    }
-
     const gestureHandler = useAnimatedGestureHandler({
         onStart: (event, ctx) => {   
           console.log("start pan")      
           },
           onActive: (event, ctx) => {
+
+         
         
-           if(offsetX[0] === 0){
-            
+           if(dragging){
+          
              transY.value = event.translationY;
+
+             let prevPos = positions.value[task.id] - 1;
+             let nextPos = positions.value[task.id] + 1;
+
+             let posChange = Math.abs(positions.value[task.id] - topPos.value);
+
+
+          
+             if(transY.value < -45  - 90 * ((topPos.value / 90) - prevPos- 1)){
+               
+              
+               // uppdatera pos med + 1, ändra i positions
+               // nollställ transY till 0,
+
+               updatePositions(task, -1);
+              // tempPos.value = tempPos.value + 1;
+              //transY.value = 0;
+              /*
+              
+              0
+                        45 + 90  1 pos = 45
+                                2 pos = 45 + 90
+                                3 ppos = 90 + 90 + 45
+
+
+              1
+
+              2
+              
+              
+              */
+               
+             }else if(transY.value >  45 + (90 * (nextPos - (topPos.value / 90) - 1))){
+               updatePositions(task, 1);
+              // tempPos.value = tempPos.value - 1;
+               // uppdatera pos med -1 ändra i positions 
+               // nollställ transY till 0,
+              // transY.value = 0;
+
+
+             }
+
             
+
            }else if(event.translationX < 0){
             transX.value = event.translationX;
            }
@@ -243,30 +325,50 @@ export default function TaskDetails({ navigation, task, index, openEditMode, act
         
           },
           onEnd: (event, ctx) => {
-               transY.value = withSpring(0, {}, runOnJS(resetOffsetX));
-  
-          
-            if(event.translationX < (screen.width * -0.6)){
-                    transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
+            console.log("END")
 
-                    opacity.value = withSpring(0, {damping: 5, overshootClamping: true}, ()=>{
-                     
-                      height.value =  withSpring(0, {damping: 2, overshootClamping: true}, runOnJS(deleteTask));
-                    });
-                });
-              
+            if(dragging){
+              runOnJS(setDragging)(false);
+              runOnJS(setOffsetX)([-20, 1000000])
+              transY.value = 0;
+              topPos.value = positions.value[task.id] * 90;
+            
             }else{
-                transX.value = withSpring(0, {damping: 5, overshootClamping: true});
-            }
+                
+            if(event.translationX < (screen.width * -0.6)){
+              transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
+
+              opacity.value = withSpring(0, {damping: 5, overshootClamping: true}, ()=>{
+               
+                height.value =  withSpring(0, {damping: 2, overshootClamping: true}, runOnJS(deleteTask));
+              });
+            });
+        
+              }else{
+                  transX.value = withSpring(0, {damping: 5, overshootClamping: true});
+              }
+
+              }
+
+          },
+          onCancel: (event, ctx) =>{
+
+            console.log("CANCEl")
           },
 
-    });
+          onFinish: (event, ctx) => {
+            console.log("finnish")
+          }
+
+    }, [dragging]);
 
 
-
+// what if man håller in och sedan släpper?
   function onLongPress(){
     console.log("on long press")
-  setOffsetX([0, 0]);
+    setOffsetX([0, 0]);
+    setDragging(true);
+    Vibration.vibrate(50);
   
   }
 
@@ -274,30 +376,32 @@ export default function TaskDetails({ navigation, task, index, openEditMode, act
 
   return (
    
-    <Animated.View style={[styles.container, animatedHeight]}>
+    <Animated.View style={[styles.container, animatedHeight, animatedTransY, animatedTopPos]}>
+     
+  
       <PanGestureHandler activeOffsetX={offsetX} onGestureEvent={gestureHandler}>
-        <Animated.View style={[animatedTransX, animatedTransY, {zIndex: 1}]} >
+
+        <Animated.View style={[animatedTransX, {zIndex: 1}]} >
 
           <View style={contentStyle}>
             <CheckBox  tintColors={checkBoxColors} style={styles.checkbox} value={taskDone} 
                 onValueChange={updateDone}/>
                 
-            <Pressable
+            <TouchableHighlight
               style={styles.list}
               onLongPress={onLongPress}
+              
               onPress={openEditMode}>
                <Text style={descriptionStyle} numberOfLines={3} ellipsizeMode="tail" >{task.description}</Text>  
-            </Pressable>
+            </TouchableHighlight>
           </View>
         </Animated.View>
       </PanGestureHandler>
-    
-      <ImageBackground source={theme === "black" ? require("../../images/background_dark_row.png") : require("../../images/background_light_row.png")} imageStyle={{resizeMode: "cover"}} style={actionRightStyle} >
+
       <Animated.View style={[animatedOpacity]}>
         <Icon style={deleteIconStyle} name="delete" size={28} />
       </Animated.View>
-      </ImageBackground>
-
+     
     </Animated.View>
 );
 }

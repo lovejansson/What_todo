@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
 export default function ListItem({ item, onPress }) {
   const colors = useContext(ColorThemeContext).colors;
 
-  const containerStyle = [styles.container, {backgroundColor: "red"}];
+  const containerStyle = [styles.container];
   const nameStyle = [styles.name, {color: colors.text}];
   const countStyle = [styles.count, {color: colors.text2}];
   useEffect(()=>{

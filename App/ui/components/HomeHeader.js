@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {View, Text, StyleSheet, Dimensions} from "react-native";
+import {View, Text, StyleSheet, Dimensions, Image} from "react-native";
 import HeaderActionRight from "./HeaderActionRight";
 import {ColorThemeContext} from "../../contexts/ColorTheme";
 import Emoji from "react-native-emoji";
@@ -31,7 +31,8 @@ const styles= StyleSheet.create({
        
     },
     emoji: {
-        fontSize: 24,
+       width: 52,
+       height: 52
     },
 });
 
@@ -43,7 +44,7 @@ export default function ListHeader(props){
         <View style={styles.container}> 
             <View style={styles.titleContainer}>
             <Text style={titleStyle}>What todo</Text>
-                   <Emoji name="shrug" style={styles.emoji}/>
+                   {/* <Image source={require("../../images/ShrugF_1.png")} style={styles.emoji}/> */}
                    </View>
             <HeaderActionRight onPress={props.actionRight}/>
         </View>
