@@ -1,4 +1,4 @@
-# What_todo
+# What todo
 Todo app in react native
 
 **Ongoing project**
