@@ -5,16 +5,14 @@ import {
   Dimensions,
   View,
   ImageBackground,
-  Pressable,
   Vibration,
-  TouchableWithoutFeedback,
-  TouchableHighlight
+  
 } from "react-native";
 import CheckBox from '@react-native-community/checkbox';
 
 import Animated, {useSharedValue, useAnimatedStyle, useAnimatedGestureHandler,
-   withSpring, runOnJS, useAnimatedProps, withTiming, useAnimatedReaction} from "react-native-reanimated";
-import { PanGestureHandler } from "react-native-gesture-handler";
+   withSpring, runOnJS, useAnimatedProps, withTiming, useAnimatedReaction, scrollTo} from "react-native-reanimated";
+import { PanGestureHandler, TouchableWithoutFeedback,TouchableOpacity} from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/AntDesign";
 
 import {DataContext} from "../../contexts/Data";
@@ -107,13 +105,12 @@ klicka på task för att ändra beskrivning  -> done
 drag and drop för att ordna
 
 
-anpassa rutig bakgrund efter skärmar/färger 
 testa komponenter -> nästa vecka 
 huvud meny på hemskärm: backup data, settings, send feedback
 setting screen : theme sync data ?
 */
 
-export default function TaskDetails({ navigation, task, index, openEditMode, positions, updatePositions})
+export default function TaskDetails({ navigation, task, index, openEditMode, scrollY, scrollView, positions, updatePositions})
 {
     /* CONTEXTS */
 
@@ -126,17 +123,18 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
 
     /* STYLE UPDATES/ADJUSTMENTS */
 
-    let contentStyle = [styles.content, {backgroundColor: colors.background}];
+    let contentStyle = [styles.content];
     let actionRightStyle = [styles.actionRight];
     const deleteIconStyle = [styles.deleteIcon, {color: colors.text2}];
     const checkBoxColors = {true: colors.check, false: colors.uncheck};
     const iconStyle = [styles.icon, {color: colors.text2}];
     const inputStyle = [styles.input, {color: colors.text}];
     const transX = useSharedValue(0);
-    const transY = useSharedValue(0);
+  
     const height = useSharedValue(90);
     const opacity = useSharedValue(1);
 
+    const transY = useSharedValue(positions.value[task.id] * 90);
     const topPos = useSharedValue(positions.value[task.id] * 90);
 
 
@@ -149,20 +147,6 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
 
             transform: [{translateX: transX.value}]
         });
-    });
-
-    const animatedTransY = useAnimatedStyle(()=>{
-
-      return({
-        transform: [{translateY: transY.value}]
-      })
-    })
-
-    const animatedHeight = useAnimatedStyle(()=> {
-
-        return ({
-                height: height.value,
-            });
     });
 
     const animatedOpacity = useAnimatedStyle(()=>{
@@ -179,14 +163,16 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
    const [dragging, setDragging] = useState(false);
 
    
-   const animatedTopPos = useAnimatedStyle(()=>{
+   const animatedOuterContainerStyle = useAnimatedStyle(()=>{
 
     return({
-      top: topPos.value,
+      top: 0,
       zIndex: dragging ? 4 : 0,
+      backgroundColor: dragging ?  colors.backgroundMenu : colors.background ,
       left: 0,
       right: 0,
-    
+      transform: [{translateY: transY.value}],
+      height: height.value,
     })
   }, [dragging]);
 
@@ -197,10 +183,8 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
 
      if(curr !== prev && prev !== null && !dragging){
      
-        console.log("new positions")
-        console.log(task.description)
-      
-        topPos.value = withSpring(curr * 90, {overshootClamping: true});
+        transY.value = withSpring(curr * 90, {overshootClamping: true});
+        topPos.value = curr * 90;
     }
 });
  
@@ -246,7 +230,7 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
       let deleted;
   
       try{
-         deleted = await db.deleteTas(task.id);
+         deleted = await db.deleteTask(task.id);
       }catch(error){
         notify("Failed to delete task", Status.ERROR);
         height.value = 90;
@@ -265,59 +249,51 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
 
     const gestureHandler = useAnimatedGestureHandler({
         onStart: (event, ctx) => {   
-          console.log("start pan")      
+          console.log("start pan") 
+          ctx.y = transY.value;     
           },
           onActive: (event, ctx) => {
 
-         
-        
            if(dragging){
-          
-             transY.value = event.translationY;
+            //  console.log(event)
 
-             let prevPos = positions.value[task.id] - 1;
-             let nextPos = positions.value[task.id] + 1;
+             transY.value = ctx.y + event.translationY;
+               console.log(transY.value);
+              console.log(scrollY.value)
 
-             let posChange = Math.abs(positions.value[task.id] - topPos.value);
-
-
-          
-             if(transY.value < -45  - 90 * ((topPos.value / 90) - prevPos- 1)){
-               
-              
-               // uppdatera pos med + 1, ändra i positions
-               // nollställ transY till 0,
-
-               updatePositions(task, -1);
-              // tempPos.value = tempPos.value + 1;
-              //transY.value = 0;
-              /*
-              
-              0
-                        45 + 90  1 pos = 45
-                                2 pos = 45 + 90
-                                3 ppos = 90 + 90 + 45
-
-
-              1
-
-              2
-              
-              
-              */
-               
-             }else if(transY.value >  45 + (90 * (nextPos - (topPos.value / 90) - 1))){
-               updatePositions(task, 1);
-              // tempPos.value = tempPos.value - 1;
-               // uppdatera pos med -1 ändra i positions 
-               // nollställ transY till 0,
-              // transY.value = 0;
-
-
-             }
-
+              let maxScroll = 22 * 90 - 6 * 90;
             
 
+            if(transY.value < scrollY.value){
+              console.log("trans y lower than lower bound")
+              console.log(transY.value);
+              console.log(scrollY.value)
+              const diff = Math.min(scrollY.value - transY.value, scrollY.value);
+              scrollY.value -= diff;
+              scrollTo(scrollView, 0, scrollY.value, false);
+              ctx.y -= diff;
+              transY.value = ctx.y + event.translationY;
+
+            }else if(transY.value > (scrollY.value + 90 * 5)){
+               
+              const diff = Math.min(transY.value -(scrollY.value + 90 * 5), maxScroll);
+              scrollY.value += diff;
+              scrollTo(scrollView, 0, scrollY.value, false);
+              ctx.y += diff;
+              transY.value = ctx.y + event.translationY;
+
+            }
+
+             let prevPosY = (positions.value[task.id] - 1) * 90;
+             let nextPosY = (positions.value[task.id] + 1)* 90;
+
+             if(transY.value < prevPosY + 45){
+               updatePositions(task, -1);
+             }else if(transY.value > nextPosY - 45){
+               updatePositions(task, 1);
+             }
+
+       
            }else if(event.translationX < 0){
             transX.value = event.translationX;
            }
@@ -330,25 +306,25 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
             if(dragging){
               runOnJS(setDragging)(false);
               runOnJS(setOffsetX)([-20, 1000000])
-              transY.value = 0;
+              transY.value = positions.value[task.id] * 90 ;
               topPos.value = positions.value[task.id] * 90;
             
             }else{
                 
-            if(event.translationX < (screen.width * -0.6)){
-              transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
+              if(event.translationX < (screen.width * -0.6)){
+                transX.value = withSpring(-screen.width, {damping: 5, overshootClamping: true}, ()=>{
 
-              opacity.value = withSpring(0, {damping: 5, overshootClamping: true}, ()=>{
-               
-                height.value =  withSpring(0, {damping: 2, overshootClamping: true}, runOnJS(deleteTask));
+                opacity.value = withSpring(0, {damping: 5, overshootClamping: true}, ()=>{
+                
+                  height.value =  withSpring(0, {damping: 2, overshootClamping: true}, runOnJS(deleteTask));
+                });
               });
-            });
         
               }else{
                   transX.value = withSpring(0, {damping: 5, overshootClamping: true});
               }
 
-              }
+            }
 
           },
           onCancel: (event, ctx) =>{
@@ -363,7 +339,7 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
     }, [dragging]);
 
 
-// what if man håller in och sedan släpper?
+
   function onLongPress(){
     console.log("on long press")
     setOffsetX([0, 0]);
@@ -376,24 +352,21 @@ export default function TaskDetails({ navigation, task, index, openEditMode, pos
 
   return (
    
-    <Animated.View style={[styles.container, animatedHeight, animatedTransY, animatedTopPos]}>
-     
-  
+    <Animated.View style={[styles.container, animatedOuterContainerStyle]}>
+
       <PanGestureHandler activeOffsetX={offsetX} onGestureEvent={gestureHandler}>
 
         <Animated.View style={[animatedTransX, {zIndex: 1}]} >
 
           <View style={contentStyle}>
             <CheckBox  tintColors={checkBoxColors} style={styles.checkbox} value={taskDone} 
-                onValueChange={updateDone}/>
-                
-            <TouchableHighlight
+                onValueChange={updateDone}/>   
+            <TouchableOpacity
               style={styles.list}
               onLongPress={onLongPress}
-              
               onPress={openEditMode}>
                <Text style={descriptionStyle} numberOfLines={3} ellipsizeMode="tail" >{task.description}</Text>  
-            </TouchableHighlight>
+            </TouchableOpacity>
           </View>
         </Animated.View>
       </PanGestureHandler>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   FlatList,
@@ -22,7 +22,8 @@ import AddTodos from "./AddTodos";
 import Menu from "./Menu";
 import ConfirmAction from "./popups/ConfirmAction";
 import EmptyData from "./EmptyData";
-import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue} from "react-native-reanimated";
+import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, useAnimatedReaction, useAnimatedRef,
+useAnimatedScrollHandler} from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import FloatingActionButton from "./FloatingActionButton";
 
@@ -122,6 +123,13 @@ export default function List({ navigation }) {
 
   const [emptyList, setEmptyList] = useState(false);
 
+
+  const scrollY = useSharedValue(0);
+  const scrollView = useAnimatedRef(null);
+
+
+
+
   useEffect(()=>{
   
     if(tasks){
@@ -156,23 +164,30 @@ export default function List({ navigation }) {
 
   }, []);
 
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: ({contentOffset: {y}}) => { scrollY.value = y;}
+  })
+
+
+  /*
+  
+givet transY och scroll så kanske man är påväg att scrolla utanför och då ska det scrollas ett snäpp samtidigt som positionen ändras
+  
+  */
+
+
 
   function updatePositions(task, direction){
-    
-
     "worklet";
 
     let positionsCopy = JSON.parse(JSON.stringify(positions.value));
-    
 
     let newPos = positionsCopy[task.id] + direction;
 
     if(newPos < 0){
       return;
     }
-    
-    
-
+  
     let values = Object.values(positionsCopy);
     let ids = Object.keys(positionsCopy);
 
@@ -180,7 +195,6 @@ export default function List({ navigation }) {
       return;
     }
 
-    console.log(newPos)
 
     for(let i = 0; i < values.length; ++i){
       if(values[i] === newPos ){
@@ -195,6 +209,8 @@ export default function List({ navigation }) {
   
 
   }
+
+  // detecta om top eller bottom är slickad mot kanten av scroll viewn måste veta abs top/ abs bottom 
 
   function toggleShowMenu(){
       setShowMenu(!showMenu);
@@ -259,31 +275,9 @@ export default function List({ navigation }) {
   }
 
 
-   
-  /*
-  
-  listan ska hålla reda på en array av positioner/sorteringen -> sharedValue
-  
-  TaskItem "lyssnar på" arrayen och om just dens position ändras så ändrar man translateY (sharedValue)
-  antingen += 90 eller -= 90 (HEIGHT av ett item)
-
-  TaskItem som rör på sig kommer att aktiver "onActive" metoden där man kan kolla translateY värdet. 
-  Om detta är antingen större än 45 eller mindre än -45 så ska man anropa en funktion som swapar positioner i positions arrayen
-    TransY värdet uppdateras alltid efter hand i onActive
-
-    onEnd: placera elementet enligt ny position + uppdatera sorteringen i db enligt positions (item id och positionering)
-  
-  */
-  function renderItem({item, index}){
-   
-      return <TaskItem navigation={navigation} 
-      task={item} index={index} listEditMode={editMode} toggleEditMode={toggleEditMode} activateDrag={activateDrag}/>
-  }
-
   function navigateToAddTodos(){
     navigation.navigate("AddTodos");
   }
-  // måste veta OM drag, VILKET drag samt få events om position
 
   return (
  
@@ -294,22 +288,29 @@ export default function List({ navigation }) {
       <ListHeader navigation={navigation}
       actionRight={toggleShowMenu} />
 
-      { emptyList|| tasks === null ? (
+      { emptyList || tasks === null ? (
         <EmptyData info="Empty list"/>
      
       ) : (
 
         
        
-        <ScrollView  contentContainerStyle={{height: window.height,backgroundColor: colors.backgroundDark}} keyboardShouldPersistTaps="handled">
+        <Animated.ScrollView 
+
+          contentContainerStyle={{
+        height: 90 * 22,
+      }}
+        
+        ref={scrollView} onScroll={scrollHandler}  keyboardShouldPersistTaps="handled">
 
             {tasks.map((task, index) => (
-             <TaskItem task={task} index={index} positions={positions} updatePositions={updatePositions}
-             listEditMode={editMode} 
-             toggleEditMode={toggleEditMode} />
+         
+
+             <TaskItem task={task} index={index}  key={task.id} positions={positions}  updatePositions={updatePositions}
+      task={task} scrollY={scrollY} scrollView={scrollView} index={index} listEditMode={editMode} toggleEditMode={toggleEditMode}/>
             ))}
        
-        </ScrollView>
+        </Animated.ScrollView>
       
      
       )}

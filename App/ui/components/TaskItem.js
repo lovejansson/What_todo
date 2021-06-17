@@ -13,12 +13,13 @@ list context som håller reda på tasks samt om listan är i editMode eller ej (
 
 */
 
-export default function TaskItem({navigation, task, index, listEditMode, toggleEditMode, positions, updatePositions}){
+export default function TaskItem({navigation, task, index, scrollY, scrollView, listEditMode, toggleEditMode, positions, updatePositions}){
    const [editMode, setEditMode] = useState(false);
 
    const [taskLocal, setTaskLocal] = useState(task);
 
    const topPos = useSharedValue(positions.value[task.id]);
+
 
    useAnimatedReaction(()=>{
     return positions.value[task.id];
@@ -68,6 +69,6 @@ export default function TaskItem({navigation, task, index, listEditMode, toggleE
    }
  
     return editMode ? <TaskEdit task={taskLocal} topPos={topPos} closeEditMode={closeEditMode}/> 
-        : <TaskDetails positions={positions} updatePositions={updatePositions} navigation={navigation} task={taskLocal} index={index} openEditMode={openEditMode}/>;
+        : <TaskDetails scrollY={scrollY} scrollView={scrollView} positions={positions} updatePositions={updatePositions} navigation={navigation} task={taskLocal} index={index} openEditMode={openEditMode}/>;
 
 }
